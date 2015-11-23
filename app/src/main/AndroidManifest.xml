@@ -9,18 +9,32 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
 
-        <activity android:name=".Splashpage" >
+        <activity android:name=".Splashpage"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".Mainmenu" >
+        <activity android:name=".Mainmenu"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.default" />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".Optionspage"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity android:name=".Highscorepage"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity android:name=".Playpage"
+            android:screenOrientation="landscape">
         </activity>
     </application>
 

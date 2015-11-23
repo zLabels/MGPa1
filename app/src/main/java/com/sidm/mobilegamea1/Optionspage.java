@@ -9,11 +9,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
-public class Mainmenu extends Activity implements OnClickListener{
+public class Optionspage extends Activity implements OnClickListener{
 
-    private Button btn_play;
-    private Button btn_options;
-    private Button btn_highscore;
+    private Button btn_optionsback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,32 +21,18 @@ public class Mainmenu extends Activity implements OnClickListener{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
-        setContentView(R.layout.mainmenu);
+        setContentView(R.layout.optionspage);
 
-        btn_play = (Button)findViewById(R.id.btn_play);
-        btn_play.setOnClickListener(this);
-
-        btn_options = (Button)findViewById(R.id.btn_options);
-        btn_options.setOnClickListener(this);
-
-        btn_highscore = (Button)findViewById(R.id.btn_highscore);
-        btn_highscore.setOnClickListener(this);
+        btn_optionsback = (Button)findViewById(R.id.btn_optionsback);
+        btn_optionsback.setOnClickListener(this);
     }
 
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        if(v == btn_play)
+        if(v == btn_optionsback)
         {
-            intent.setClass(this,Playpage.class);
-        }
-        else if( v == btn_options)
-        {
-            intent.setClass(this,Optionspage.class);
-        }
-        else if( v == btn_highscore)
-        {
-            intent.setClass(this,Highscorepage.class);
+            intent.setClass(this,Mainmenu.class);
         }
 
         startActivity(intent);
