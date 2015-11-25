@@ -47,6 +47,18 @@ public class Playpage extends Activity implements OnClickListener{
         {
             intent.setClass(this,Mainmenu.class);
         }
+        if(v == btn_adventure)
+        {
+            intent.setClass(this,GamePage.class);
+        }
+        if(v == btn_endless)
+        {
+            intent.setClass(this,GamePage.class);
+        }
+        if(v == btn_tutorial)
+        {
+            intent.setClass(this,GamePage.class);
+        }
 
         startActivity(intent);
     }

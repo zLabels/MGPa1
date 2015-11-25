@@ -14,19 +14,28 @@
         android:id = "@+id/btn_play"
         android:layout_width="135dp"
         android:layout_height="135dp"
-        android:background="@drawable/playbutton"/>
+        android:background="@drawable/playbutton"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp" />
 
     <Button
         android:id = "@+id/btn_options"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:background="@drawable/optionsbutton"/>
+        android:background="@drawable/optionsbutton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/btn_play"
+        android:layout_marginEnd="97dp" />
 
     <Button
         android:id = "@+id/btn_highscore"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:background="@drawable/highscorebutton"/>
+        android:background="@drawable/highscorebutton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/btn_play"
+        android:layout_marginStart="105dp" />
 
 
 
