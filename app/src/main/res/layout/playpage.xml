@@ -13,4 +13,28 @@
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp" />
 
+    <Button
+        android:id = "@+id/btn_adventure"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/adventurebutton"
+        android:layout_marginLeft="45dp"
+        android:layout_marginTop="65dp" />
+
+    <Button
+        android:id = "@+id/btn_endless"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/endlessbutton"
+        android:layout_marginLeft="45dp"
+        android:layout_marginTop="145dp" />
+
+    <Button
+        android:id = "@+id/btn_tutorial"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/tutorialbutton"
+        android:layout_marginLeft="45dp"
+        android:layout_marginTop="225dp" />
+
 </RelativeLayout>

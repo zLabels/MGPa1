@@ -12,6 +12,9 @@ import android.widget.Button;
 public class Playpage extends Activity implements OnClickListener{
 
     private Button btn_playback;
+    private Button btn_adventure;
+    private Button btn_endless;
+    private Button btn_tutorial;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,14 @@ public class Playpage extends Activity implements OnClickListener{
         btn_playback = (Button)findViewById(R.id.btn_playback);
         btn_playback.setOnClickListener(this);
 
+        btn_adventure = (Button)findViewById(R.id.btn_adventure);
+        btn_adventure.setOnClickListener(this);
+
+        btn_endless = (Button)findViewById(R.id.btn_endless);
+        btn_endless.setOnClickListener(this);
+
+        btn_tutorial = (Button)findViewById(R.id.btn_tutorial);
+        btn_tutorial.setOnClickListener(this);
 
     }
 
