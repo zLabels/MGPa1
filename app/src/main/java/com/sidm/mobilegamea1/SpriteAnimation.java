@@ -5,39 +5,36 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 
 /**
- * Created by Malcolm on 3/12/2015.
+ * Created by Princeton on 3/12/2015.
  */
 public class SpriteAnimation {
+    private Bitmap bitmap;  //Animation sequence
+    private Rect sourceRect;    //Rect to be drawn from animation
+    private int frame;  //Number of frames
+    private int currentFrame;   //Current frame
+    private long frameTicker;   //Time of last updated frame
+    private int framePeroid;    //Milliseconds between frame
 
-    private Bitmap bitmap; // the animation sequence
-    private Rect sourceRect; // the rectangle to be drawn from the animation bitmap
-    private int frame; // number of frames in animation
-    private int currentFrame; // the current frame
-    private long frameTicker; // the time of the last frame update
-    private int framePeriod; // milliseconds between each frame (1000/fps)
+    private int spriteWidth;    //Width of sprite to be calculated
+    private int spriteHeight;   //Height of sprite
 
-    private int spriteWidth; // the width of the sprite to calculate the cut out rectangle
-    private int spriteHeight; // the height of the sprite
+    private int x;  //X coord of object
+    private int y;  //Y coord of object
 
-    private int x; // the X coordinate of the object(top left of the image)
-    private int y; // the Y coordinate of the object(top left of the image)
-
-    public SpriteAnimation(Bitmap bitmap, int x, int y, int fps, int frameCount)
-    {
+    public SpriteAnimation(Bitmap bitmap, int x , int y, int fps, int frameCount){
         this.bitmap = bitmap;
         this.x = x;
         this.y = y;
 
         currentFrame = 0;
-
         frame = frameCount;
 
-        spriteWidth = bitmap.getWidth()/frameCount; // Assumed that each frame has the same width
+        spriteWidth = bitmap.getWidth() / frameCount;
         spriteHeight = bitmap.getHeight();
 
-        sourceRect = new Rect(0,0, spriteWidth, spriteHeight);
+        sourceRect = new Rect(0, 0, spriteWidth, spriteHeight);
 
-        framePeriod = 1000/fps;
+        framePeroid = 1000 / fps;
         frameTicker = 01;
     }
 
@@ -81,12 +78,12 @@ public class SpriteAnimation {
         this.frameTicker = frameTicker;
     }
 
-    public int getFramePeriod() {
-        return framePeriod;
+    public int getFramePeroid() {
+        return framePeroid;
     }
 
-    public void setFramePeriod(int framePeriod) {
-        this.framePeriod = framePeriod;
+    public void setFramePeroid(int framePeroid) {
+        this.framePeroid = framePeroid;
     }
 
     public int getSpriteWidth() {
@@ -123,14 +120,14 @@ public class SpriteAnimation {
 
     public void update(long gameTime)
     {
-        if(gameTime > frameTicker + framePeriod)
+        if(gameTime > frameTicker + framePeroid)
         {
             frameTicker = gameTime;
-            currentFrame++;
+            currentFrame++; //Increment the frame
 
-            if(currentFrame >= frame)
+            if(currentFrame >= frame)   //Frame = total no. of frames
             {
-                currentFrame = 0;
+                currentFrame = 0;   //Reached end of frame, reset to 0
             }
         }
 
@@ -138,13 +135,8 @@ public class SpriteAnimation {
         this.sourceRect.right = this.sourceRect.left + spriteWidth;
     }
 
-    public void draw(Canvas canvas)
-    {
-        // Image of each frame is defined by sourceRect
-        // destRect is the area for the image of each frame to be drawn
-
-        Rect destRect = new Rect(getX(), getY(), getX() + spriteWidth, getY() + spriteHeight);
-        canvas.drawBitmap(bitmap, sourceRect, destRect, null);
+    public void draw(Canvas canvas){
+        Rect destRect = new Rect(getX(),getY(), getX() + spriteWidth, getY() + spriteHeight);
+        canvas.drawBitmap(bitmap,sourceRect, destRect, null);
     }
-
 }
