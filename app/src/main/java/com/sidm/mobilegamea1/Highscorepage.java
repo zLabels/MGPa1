@@ -27,6 +27,7 @@ public class Highscorepage extends Activity implements OnClickListener{
         btn_highscoreback.setOnClickListener(this);
     }
 
+    @Override
     public void onClick(View v) {
         Intent intent = new Intent();
 

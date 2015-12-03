@@ -27,6 +27,7 @@ public class Optionspage extends Activity implements OnClickListener{
         btn_optionsback.setOnClickListener(this);
     }
 
+    @Override
     public void onClick(View v) {
         Intent intent = new Intent();
 
