@@ -5,10 +5,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.Random;
 
 public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
     // Implement this interface to receive information about changes to the surface.
@@ -30,6 +33,14 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     public float FPS;
     float deltaTime;
     long dt;
+    Paint paint = new Paint();
+
+    //Ship position
+    private short mX = 0, mY = 0;
+
+    //Sprite animation
+    private SpriteAnimation stone_anim;
+    Random r = new Random();
 
     // Variable for Game State check
     private short GameState;
@@ -50,7 +61,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // 1e)load the image when this class is being instantiated
         bg = BitmapFactory.decodeResource(getResources(),
                 R.drawable.gamescene);
-        scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth,ScreenHeight,true);
+        scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
         // 4c) Load the images of the spaceships
         ship[0] = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ship2_1);
@@ -61,7 +72,13 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         ship[3] = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ship2_4);
 
+        paint.setARGB(255,0,0,0);
+        paint.setStrokeWidth(100);
+        paint.setTextSize(30);
 
+        stone_anim = new SpriteAnimation(BitmapFactory.decodeResource(getResources(),R.drawable.flystone),320,64,5,5);
+        stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
+        stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
         // Create the game loop thread
         myThread = new GameThread(getHolder(), this);
 
@@ -108,13 +125,15 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         {
             return;
         }
-        canvas.drawBitmap(scaledbg, bgX, bgY,null);
-        canvas.drawBitmap(scaledbg, bgX + ScreenWidth, bgY,null);
+        canvas.drawBitmap(scaledbg, bgX, bgY, null);
+        canvas.drawBitmap(scaledbg, bgX + ScreenWidth, bgY, null);
         // 4d) Draw the spaceships
-        canvas.drawBitmap(ship[shipindex],100,100,null);
+        canvas.drawBitmap(ship[shipindex], mX, mY, null);
 
         // Bonus) To print FPS on the screen
+        canvas.drawText("FPS:" + FPS, 130, 75, paint);
 
+        stone_anim.draw(canvas);
     }
 
     //Update method to update the game play
@@ -131,8 +150,15 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
                 shipindex++;
                 shipindex%=4;
-                // 4e) Update the spaceship images / shipIndex so that the animation will occur.
 
+                stone_anim.update(System.currentTimeMillis());
+
+                if(CheckCollision(mX,mY,ship[shipindex].getWidth(),  ship[shipindex].getHeight(),
+                        stone_anim.getX(),stone_anim.getY(),stone_anim.getSpriteWidth(),stone_anim.getSpriteHeight()))
+                {
+                    stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
+                    stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
+                }
             }
             break;
         }
@@ -148,12 +174,43 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    public boolean CheckCollision(int x1,int y1,int w1,int h1, int x2, int y2, int w2, int h2)
+    {
+        if(x2>=x1 && x2<=x1 + w1){  //start detect collision of top left
+            if(y2>= y1 & y2<= y1 + h1){
+                return true;
+            }
+        }
+        if(x2+w2>=x1 && x2+w2<=x1+w1){  //Top right
+            if(y2>=y1 && y2<=y1+h1){
+                return true;
+            }
+        }
+        if(x2>=x1 && x2<= x1+w1){  //Btm Left
+            if(y2+h2>=y1 && y2+h2<=y1+h1){
+                return true;
+            }
+        }
+        if(x2+w2>=x1 && x2+w2<=x1+w1){  //Btm Right
+            if(y2+h2>=y1 && y2+h2<=y1+h1){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event){
 
         // 5) In event of touch on screen, the spaceship will relocate to the point of touch
+        short X = (short) event.getX();
+        short Y = (short) event.getY();
 
-
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            //New Location
+            mX = (short)(X - ship[shipindex].getWidth()/2);
+            mY = (short)(Y - ship[shipindex].getHeight()/2);
+        }
         return super.onTouchEvent(event);
     }
 }
