@@ -6,17 +6,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.Random;
 
 public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     // Implement this interface to receive information about changes to the surface.
-
     private GameThread myThread = null; // Thread to control the rendering
 
     private Bitmap bg, scaledbg;    //Used for background
@@ -51,14 +50,43 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         // Context is the current state of the application/object
         super(context);
-
         // Adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
-
         //Set information to get screen size
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         ScreenWidth = metrics.widthPixels;
         ScreenHeight = metrics.heightPixels;
+
+        this.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        this.setOnTouchListener(new OnSwipeTouchListener(context) {
+            public boolean onSwipeRight() {
+                FetchObstacle();
+                return true;
+            }
+
+            public boolean onSwipeLeft() {
+                FetchObstacle();
+                return true;
+            }
+
+            public boolean onSwipeTop() {
+                FetchObstacle();
+                return true;
+            }
+
+            public boolean onSwipeBottom() {
+                FetchObstacle();
+                return true;
+            }
+            public void onClick(int posX, int posY){
+                ScreenTap(posX,posY);
+            }
+        });
 
         //Loading images when created
         bg = BitmapFactory.decodeResource(getResources(),
@@ -94,6 +122,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+
     //must implement inherited abstract methods
     public void surfaceCreated(SurfaceHolder holder) {
         // Create the thread
@@ -122,7 +151,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     public void RenderGameplay(Canvas canvas) {
@@ -249,6 +277,21 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    public void ScreenTap(int X, int Y){
+        //New Location
+        mX = (short)(X - ship[shipindex].getWidth()/2);
+        mY = (short)(Y - ship[shipindex].getHeight()/2);
+
+        for(int i = 0; i < obstacleList.length; ++i) {
+            //Only check against active objects
+            if(obstacleList[i].isActive()) {
+                if (CheckTouch(X, Y, obstacleList[i].getPosX(), obstacleList[i].getPosY(),
+                        (int)obstacleList[i].getPosX() + obstacleList[i].getImgWidth(),(int)obstacleList[i].getPosY() + obstacleList[i].getImgHeight())) {
+                    obstacleList[i].setActive(false);
+                }
+            }
+        }
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event){
 
@@ -273,4 +316,5 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
         return super.onTouchEvent(event);
     }
+
 }
