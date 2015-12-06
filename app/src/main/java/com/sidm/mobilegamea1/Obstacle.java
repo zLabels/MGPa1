@@ -7,9 +7,17 @@ import android.graphics.Bitmap;
  */
 public class Obstacle {
 
+    public enum TYPE{
+        T_TAP,
+        T_LEFT,
+        T_RIGHT,
+        T_UP,
+        T_DOWN
+    };
+
     float posX = 0, posY = 0;   //Coordinates of obstacle
     private Bitmap obstacle;    //Image of obstacle
-    int type = 1; //Type of obstacle
+    TYPE type = TYPE.T_TAP; //Type of obstacle
     int health = 10;   //Health of obstacle if required
     boolean active = false; //Active status of obstacle
     int imgWidth;   //Width of image
@@ -18,7 +26,7 @@ public class Obstacle {
     public Obstacle() {
         this.posX = 0;
         this.posY = 0;
-        this.type = 1;
+        this.type = TYPE.T_TAP;
         this.health = 10;
         this.active = false;
         this.imgHeight = 0;
@@ -33,7 +41,7 @@ public class Obstacle {
         return imgHeight;
     }
 
-    public void SetAllData(float posX,float posY, Bitmap img, int type, int health, boolean active){
+    public void SetAllData(float posX,float posY, Bitmap img, TYPE type, int health, boolean active){
         this.posX = posX;
         this.posY = posY;
         this.obstacle = img;
@@ -77,11 +85,11 @@ public class Obstacle {
         this.imgWidth = this.obstacle.getWidth();
     }
 
-    public int getType() {
+    public TYPE getType() {
         return type;
     }
 
-    public void setType(short type) {
+    public void setType(TYPE type) {
         this.type = type;
     }
 
