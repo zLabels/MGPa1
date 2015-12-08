@@ -36,6 +36,13 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     private short GameState;    // Variable for Game State check
 
+    // Variables for swiping
+    Vector2 InitialPos = new Vector2(0,0);
+    Vector2 LastPos = new Vector2(0,0);
+    Vector2 DirectionVector = new Vector2(0,0);
+    boolean Tapped = false;
+    boolean FingerDown = false;
+
     //Game elements
     private Obstacle[] obstacleList = new Obstacle[20];
     float SpawnRate = 0.5f;
@@ -55,53 +62,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         ScreenWidth = metrics.widthPixels;
         ScreenHeight = metrics.heightPixels;
-
-        this.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        this.setOnTouchListener(new OnSwipeTouchListener(context) {
-            public boolean onSwipeRight() {
-                if(nearestObstacle.getType() == Obstacle.TYPE.T_RIGHT)
-                {
-                    nearestObstacle.setActive(false);
-                    score += 10;
-                }
-                return true;
-            }
-
-            public boolean onSwipeLeft() {
-                if(nearestObstacle.getType() == Obstacle.TYPE.T_LEFT)
-                {
-                    nearestObstacle.setActive(false);
-                    score += 10;
-                }
-                return true;
-            }
-
-            public boolean onSwipeTop() {
-                if(nearestObstacle.getType() == Obstacle.TYPE.T_UP)
-                {
-                    nearestObstacle.setActive(false);
-                    score += 10;
-                }
-                return true;
-            }
-
-            public boolean onSwipeBottom() {
-                if(nearestObstacle.getType() == Obstacle.TYPE.T_DOWN)
-                {
-                    nearestObstacle.setActive(false);
-                    score += 10;
-                }
-                return true;
-            }
-            public void onClick(int posX, int posY){
-                ScreenTap(posX,posY);
-            }
-        });
 
         //Loading images when created
         bg = BitmapFactory.decodeResource(getResources(),
@@ -213,6 +173,24 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
                 stickman_anim.update(System.currentTimeMillis());
 
+                // Detecting user tap for tapping obstacle
+                if(nearestObstacle.getType() == Obstacle.TYPE.T_TAP && Tapped == true)
+                {
+                    score += 10;
+                    nearestObstacle.setActive(false);
+                    DirectionVector.SetZero();
+                    Tapped = false;
+                }
+                // Detecting user swipe direction for direction obstacle
+                else if(DirectionVector.IsZero() == false && Obstacle.fromInteger(ProcessSwipe(DirectionVector)) == nearestObstacle.getType())
+                {
+                    score += 10;
+                    nearestObstacle.setActive(false);
+                    DirectionVector.SetZero();
+                }
+
+                DirectionVector.SetZero();
+
                 //Updating game elements
                 for(int i = 0; i < obstacleList.length; ++i){
                     if(obstacleList[i].isActive()){
@@ -226,14 +204,13 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                             obstacleList[i].setActive(false);
                             GameActive = false;
                         }
-                        //Get nearest non tap obstacle
-                        if(obstacleList[i].getType() != Obstacle.TYPE.T_TAP) {
+                        //Get nearest obstacle
                             if (nearestObstacle.isActive() == false) {
                                 nearestObstacle = obstacleList[i];
                             } else if (obstacleList[i].getPosX() < nearestObstacle.getPosX()) {
                                 nearestObstacle = obstacleList[i];
                             }
-                        }
+
                         //if out of screen
                         if(obstacleList[i].getPosX() < 0){
                             obstacleList[i].setActive(false);
@@ -276,13 +253,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             if(y2+h2>=y1 && y2+h2<=y1+h1){
                 return true;
             }
-        }
-        return false;
-    }
-
-    public boolean CheckTouch(int touch_x,int touch_y, float min_x,float min_y, int max_x,int max_y){
-        if(touch_x >= min_x && touch_x <= max_x && touch_y >= min_y && touch_y <= max_y){
-            return true;
         }
         return false;
     }
@@ -338,4 +308,99 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        // If the next obstacle is not a tap type check for swipe
+        if(nearestObstacle.getType() != Obstacle.TYPE.T_TAP && FingerDown == false) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
+                    InitialPos.Set(event.getX(), event.getY());
+                }
+                break;
+                case MotionEvent.ACTION_MOVE:
+                    LastPos.Set(event.getX(), event.getY());
+                    break;
+                case MotionEvent.ACTION_UP:
+                    DirectionVector.Set(LastPos.operatorMinus(InitialPos));
+                    break;
+            }
+        }
+        // else check for tap
+        else
+        {
+            if(event.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                FingerDown = true;
+                Tapped = true;
+            }
+            else if(event.getAction() == MotionEvent.ACTION_UP)
+            {
+                FingerDown = false;
+            }
+        }
+        return true;
+    }
+
+    public int ProcessSwipe(Vector2 SwipeDirection) {
+        float x = SwipeDirection.x;
+        float y = SwipeDirection.y;
+
+        // x more than 0
+        if (0 < x) {
+            // y more than 0
+            if (0 < y) {
+                // Since x & y positive check which bigger
+                // x more than y hence direction right
+                if (x > y) {
+                    return 2;
+                }
+                // y more than x hence direction down
+                else {
+                    return 4;
+                }
+            }
+            // y less than 0
+            else
+            {
+                // Check x or y(converted to positive) which is bigger
+                // x bigger than y when positive hence direction right
+                if(x > (-1 * y))
+                {
+                    return 2;
+                }
+                // y when positive is bigger than x hence direction up
+                else
+                {
+                    return 3;
+                }
+            }
+        }
+        // x less than 0
+        else {
+            // y more than 0
+            if (0 < y) {
+                // Since x & y positive check which bigger
+                // x when positive more than y hence direction left
+                if ((-1 * x) > y) {
+                    return 1;
+                }
+                // y more than x when positive hence direction down
+                else {
+                    return 4;
+                }
+            }
+            // y less than 0
+            else {
+                // Check x or y(converted to positive) which is bigger
+                // x when positive bigger than y when positive hence direction left
+                if ((-1 * x) > (-1 * y)) {
+                    return 1;
+                }
+                // y when positive is bigger than x hence direction up
+                else {
+                    return 3;
+                }
+            }
+        }
+    }
 }

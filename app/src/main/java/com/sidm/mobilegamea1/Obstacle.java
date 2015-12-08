@@ -33,6 +33,18 @@ public class Obstacle {
         this.imgWidth = 0;
     }
 
+    public static TYPE fromInteger(int x)
+    {
+        switch(x) {
+            case 0: return TYPE.T_TAP;
+            case 1: return TYPE.T_LEFT;
+            case 2: return TYPE.T_RIGHT;
+            case 3: return TYPE.T_UP;
+            case 4: return TYPE.T_DOWN;
+        }
+        return null;
+    }
+
     public int getImgWidth() {
         return imgWidth;
     }
