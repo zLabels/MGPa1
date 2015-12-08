@@ -16,26 +16,26 @@
 
     <Button
         android:id = "@+id/btn_adventure"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:background="@drawable/adventurebutton"
-        android:layout_marginLeft="45dp"
-        android:layout_marginTop="65dp" />
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="70dp" />
 
     <Button
         android:id = "@+id/btn_endless"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:background="@drawable/endlessbutton"
-        android:layout_marginLeft="45dp"
-        android:layout_marginTop="145dp" />
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="160dp" />
 
     <Button
         android:id = "@+id/btn_tutorial"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:background="@drawable/tutorialbutton"
-        android:layout_marginLeft="45dp"
-        android:layout_marginTop="225dp" />
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="250dp" />
 
 </RelativeLayout>

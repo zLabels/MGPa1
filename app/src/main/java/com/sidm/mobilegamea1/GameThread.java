@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 public class GameThread extends Thread {
     // The actual view that handles inputs and draws to the surface
     private GamePanelSurfaceView myView;
-
     // Surface holder that can access the physical surface
     private SurfaceHolder holder;
 

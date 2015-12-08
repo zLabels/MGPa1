@@ -10,59 +10,107 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.Random;
 
-public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
+public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     // Implement this interface to receive information about changes to the surface.
-
     private GameThread myThread = null; // Thread to control the rendering
 
-    // 1a) Variables used for background rendering
-    private Bitmap bg, scaledbg;
-    // 1b) Define Screen width and Screen height as integer
-    int ScreenWidth, ScreenHeight;
-    // 1c) Variables for defining background start and end point
-    private short bgX = 0, bgY= 0;
-    // 4a) bitmap array to stores 4 images of the spaceship
-    private Bitmap[] ship = new Bitmap[4];
-    private short shipindex;
-    // 4b) Variable as an index to keep track of the spaceship images
+    private Bitmap bg, scaledbg;    //Used for background
+    int ScreenWidth, ScreenHeight;  //Define Screen width and Screen height
+    private short bgX = 0, bgY = 0;  //Variables for defining background start and end point
+    short ScrollSpeed = 500;    //Speed of background scrolling
+    float timer = 0.f;
+    int score = 0;
+
+    private Bitmap[] ship = new Bitmap[4];  // 4a) bitmap array to stores 4 images of the spaceship
+    private short shipindex;    //Index to track spaceship image
 
     // Variables for FPS
-    public float FPS;
+    public float FPS = 0;
     float deltaTime;
     long dt;
-    Paint paint = new Paint();
+    Paint paint = new Paint(); //Used for text rendering
 
-    //Ship position
-    private short mX = 0, mY = 0;
+    private short mX = 0, mY = 425;   //Ship position
 
     //Sprite animation
     private SpriteAnimation stone_anim;
     Random r = new Random();
 
-    // Variable for Game State check
-    private short GameState;
+    private short GameState;    // Variable for Game State check
+
+    //Game elements
+    private Obstacle[] obstacleList = new Obstacle[20];
+    float SpawnRate = 0.5f;
+    float SpawnTimer = 0.f;
+    private Obstacle nearestObstacle;
 
     //constructor for this GamePanelSurfaceView class
-    public GamePanelSurfaceView (Context context){
+    public GamePanelSurfaceView(Context context) {
 
         // Context is the current state of the application/object
         super(context);
-
         // Adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
-
-        // 1d) Set information to get screen size
+        //Set information to get screen size
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         ScreenWidth = metrics.widthPixels;
         ScreenHeight = metrics.heightPixels;
-        // 1e)load the image when this class is being instantiated
+
+        this.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        this.setOnTouchListener(new OnSwipeTouchListener(context) {
+            public boolean onSwipeRight() {
+                if(nearestObstacle.getType() == Obstacle.TYPE.T_RIGHT)
+                {
+                    nearestObstacle.setActive(false);
+                    score += 10;
+                }
+                return true;
+            }
+
+            public boolean onSwipeLeft() {
+                if(nearestObstacle.getType() == Obstacle.TYPE.T_LEFT)
+                {
+                    nearestObstacle.setActive(false);
+                    score += 10;
+                }
+                return true;
+            }
+
+            public boolean onSwipeTop() {
+                if(nearestObstacle.getType() == Obstacle.TYPE.T_UP)
+                {
+                    nearestObstacle.setActive(false);
+                    score += 10;
+                }
+                return true;
+            }
+
+            public boolean onSwipeBottom() {
+                if(nearestObstacle.getType() == Obstacle.TYPE.T_DOWN)
+                {
+                    nearestObstacle.setActive(false);
+                    score += 10;
+                }
+                return true;
+            }
+            public void onClick(int posX, int posY){
+                ScreenTap(posX,posY);
+            }
+        });
+
+        //Loading images when created
         bg = BitmapFactory.decodeResource(getResources(),
-                R.drawable.gamescene);
+                R.drawable.game_background);
         scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
-        // 4c) Load the images of the spaceships
         ship[0] = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ship2_1);
         ship[1] = BitmapFactory.decodeResource(getResources(),
@@ -72,33 +120,42 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         ship[3] = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ship2_4);
 
-        paint.setARGB(255,0,0,0);
+        //Text rendering values
+        paint.setARGB(255, 0, 0, 0);
         paint.setStrokeWidth(100);
         paint.setTextSize(30);
 
-        stone_anim = new SpriteAnimation(BitmapFactory.decodeResource(getResources(),R.drawable.flystone),320,64,5,5);
+        //Sprite animation init
+        stone_anim = new SpriteAnimation(BitmapFactory.decodeResource(getResources(), R.drawable.flystone), 320, 64, 5, 5);
         stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
         stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
+
         // Create the game loop thread
         myThread = new GameThread(getHolder(), this);
 
         // Make the GamePanel focusable so it can handle events
         setFocusable(true);
+
+        for (int i = 0; i < obstacleList.length; ++i) {
+            obstacleList[i] = new Obstacle();
+        }
+        nearestObstacle = obstacleList[0];
     }
 
+
     //must implement inherited abstract methods
-    public void surfaceCreated(SurfaceHolder holder){
+    public void surfaceCreated(SurfaceHolder holder) {
         // Create the thread
-        if (!myThread.isAlive()){
+        if (!myThread.isAlive()) {
             myThread = new GameThread(getHolder(), this);
             myThread.startRun(true);
             myThread.start();
         }
     }
 
-    public void surfaceDestroyed(SurfaceHolder holder){
+    public void surfaceDestroyed(SurfaceHolder holder) {
         // Destroy the thread
-        if (myThread.isAlive()){
+        if (myThread.isAlive()) {
             myThread.startRun(false);
 
 
@@ -108,21 +165,17 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             try {
                 myThread.join();
                 retry = false;
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
             }
         }
     }
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height){
-
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
     }
 
     public void RenderGameplay(Canvas canvas) {
         // 2) Re-draw 2nd image after the 1st image ends
-        if(canvas == null)
-        {
+        if (canvas == null) {
             return;
         }
         canvas.drawBitmap(scaledbg, bgX, bgY, null);
@@ -130,10 +183,21 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // 4d) Draw the spaceships
         canvas.drawBitmap(ship[shipindex], mX, mY, null);
 
-        // Bonus) To print FPS on the screen
+        //FPS
         canvas.drawText("FPS:" + FPS, 130, 75, paint);
+        canvas.drawText("ScreenHeight:" + ScreenHeight, 130, 100, paint);
+        canvas.drawText("ScreenWidth:" + ScreenWidth, 130, 125, paint);
+        //Score
+        canvas.drawText("Score:" + score, 800, 75, paint);
 
         stone_anim.draw(canvas);
+
+        for (int i = 0; i < obstacleList.length; ++i) {
+            //Only draw if active
+            if (obstacleList[i].isActive()) {
+                canvas.drawBitmap(obstacleList[i].getObstacle(), obstacleList[i].getPosX(), obstacleList[i].getPosY(), null);
+            }
+        }
     }
 
     //Update method to update the game play
@@ -142,14 +206,26 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         switch (GameState) {
             case 0: {
-                // 3) Update the background to allow panning effect
-                bgX -= 500 * dt; //Change speed of the panning effect
+                bgX -= ScrollSpeed * dt; //Speed of background scrolling
                 if (bgX < -ScreenWidth){
                     bgX = 0;
                 }
 
                 shipindex++;
                 shipindex%=4;
+                SpawnTimer += dt;
+                timer += dt;
+
+                if(timer > 5.f)
+                {
+                    ScrollSpeed += 100;
+                    timer = 0;
+                }
+                if(SpawnTimer > SpawnRate)
+                {
+                    FetchObstacle();
+                    SpawnTimer = 0.f;
+                }
 
                 stone_anim.update(System.currentTimeMillis());
 
@@ -159,6 +235,27 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
                     stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
                 }
+
+                //Updating game elements
+                for(int i = 0; i < obstacleList.length; ++i){
+                    if(obstacleList[i].isActive()){
+                        obstacleList[i].setPosX(obstacleList[i].getPosX() - ScrollSpeed * dt);
+
+                        //Get nearest non tap obstacle
+                        if(obstacleList[i].getType() != Obstacle.TYPE.T_TAP) {
+                            if (nearestObstacle.isActive() == false) {
+                                nearestObstacle = obstacleList[i];
+                            } else if (obstacleList[i].getPosX() < nearestObstacle.getPosX()) {
+                                nearestObstacle = obstacleList[i];
+                            }
+                        }
+                        //if out of screen
+                        if(obstacleList[i].getPosX() < 0){
+                            obstacleList[i].setActive(false);
+                        }
+                    }
+                }
+
             }
             break;
         }
@@ -199,18 +296,66 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         return false;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event){
-
-        // 5) In event of touch on screen, the spaceship will relocate to the point of touch
-        short X = (short) event.getX();
-        short Y = (short) event.getY();
-
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            //New Location
-            mX = (short)(X - ship[shipindex].getWidth()/2);
-            mY = (short)(Y - ship[shipindex].getHeight()/2);
+    public boolean CheckTouch(int touch_x,int touch_y, float min_x,float min_y, int max_x,int max_y){
+        if(touch_x >= min_x && touch_x <= max_x && touch_y >= min_y && touch_y <= max_y){
+            return true;
         }
-        return super.onTouchEvent(event);
+        return false;
     }
+
+    public void FetchObstacle()
+    {
+        for(int i = 0; i < obstacleList.length; ++i){
+            if(obstacleList[i].isActive() == false){
+                int result = r.nextInt((100 - 0) + 1) + 0;
+                if(result >= 80) {
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.tap_obstacle), Obstacle.TYPE.T_TAP, 10, true);
+                    break;
+                }
+                else if(result >=60 && result < 80){
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.left_obstacle), Obstacle.TYPE.T_LEFT, 10, true);
+                    break;
+                }
+                else if(result >=40 && result < 60){
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.up_obstacle), Obstacle.TYPE.T_UP, 10, true);
+                    break;
+                }
+                else if(result >=20 && result < 40){
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.down_obstacle), Obstacle.TYPE.T_DOWN, 10, true);
+                    break;
+                }
+                else if(result >=0 && result < 20){
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.right_obstacle), Obstacle.TYPE.T_RIGHT, 10, true);
+                    break;
+                }
+                else{
+                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.tap_obstacle), Obstacle.TYPE.T_TAP, 10, true);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void ScreenTap(int X, int Y){
+
+        for(int i = 0; i < obstacleList.length; ++i) {
+            //Only check against active objects
+            if(obstacleList[i].isActive() && obstacleList[i].getType() == Obstacle.TYPE.T_TAP) {
+                if (CheckTouch(X, Y, obstacleList[i].getPosX(), obstacleList[i].getPosY(),
+                        (int)obstacleList[i].getPosX() + obstacleList[i].getImgWidth(),
+                        (int)obstacleList[i].getPosY() + obstacleList[i].getImgHeight()))
+                {
+                    obstacleList[i].setActive(false);
+                    score += 10;
+                }
+            }
+        }
+    }
+
 }

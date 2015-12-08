@@ -3,18 +3,20 @@ package com.sidm.mobilegamea1;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.media.MediaPlayer;
 
 public class Mainmenu extends Activity implements OnClickListener{
 
     private Button btn_play;
     private Button btn_options;
     private Button btn_highscore;
-
+    MediaPlayer mp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +26,8 @@ public class Mainmenu extends Activity implements OnClickListener{
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
         setContentView(R.layout.mainmenu);
+
+        mp = MediaPlayer.create(this, R.raw.menu_feedback);
 
         btn_play = (Button)findViewById(R.id.btn_play);
         btn_play.setOnClickListener(this);
@@ -37,6 +41,8 @@ public class Mainmenu extends Activity implements OnClickListener{
 
     public void onClick(View v) {
         Intent intent = new Intent();
+
+        mp.start();
 
         if(v == btn_play)
         {
