@@ -255,7 +255,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         }
                     }
                 }
-
             }
             break;
         }
@@ -346,14 +345,10 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         for(int i = 0; i < obstacleList.length; ++i) {
             //Only check against active objects
-            if(obstacleList[i].isActive() && obstacleList[i].getType() == Obstacle.TYPE.T_TAP) {
-                if (CheckTouch(X, Y, obstacleList[i].getPosX(), obstacleList[i].getPosY(),
-                        (int)obstacleList[i].getPosX() + obstacleList[i].getImgWidth(),
-                        (int)obstacleList[i].getPosY() + obstacleList[i].getImgHeight()))
-                {
-                    obstacleList[i].setActive(false);
-                    score += 10;
-                }
+            if(obstacleList[i].isActive() && obstacleList[i].getType() == Obstacle.TYPE.T_TAP)
+            {
+                obstacleList[i].setActive(false);
+                score += 10;
             }
         }
     }
