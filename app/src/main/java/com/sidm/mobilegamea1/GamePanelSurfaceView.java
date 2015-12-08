@@ -25,19 +25,13 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     float timer = 0.f;
     int score = 0;
 
-    private Bitmap[] ship = new Bitmap[4];  // 4a) bitmap array to stores 4 images of the spaceship
-    private short shipindex;    //Index to track spaceship image
-
     // Variables for FPS
     public float FPS = 0;
     float deltaTime;
     long dt;
     Paint paint = new Paint(); //Used for text rendering
 
-    private short mX = 0, mY = 425;   //Ship position
-
-    //Sprite animation
-    private SpriteAnimation stone_anim;
+    private SpriteAnimation stickman_anim;
     Random r = new Random();
 
     private short GameState;    // Variable for Game State check
@@ -47,6 +41,8 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     float SpawnRate = 0.5f;
     float SpawnTimer = 0.f;
     private Obstacle nearestObstacle;
+
+    private boolean GameActive = true;
 
     //constructor for this GamePanelSurfaceView class
     public GamePanelSurfaceView(Context context) {
@@ -111,14 +107,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         bg = BitmapFactory.decodeResource(getResources(),
                 R.drawable.game_background);
         scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
-        ship[0] = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ship2_1);
-        ship[1] = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ship2_2);
-        ship[2] = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ship2_3);
-        ship[3] = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ship2_4);
 
         //Text rendering values
         paint.setARGB(255, 0, 0, 0);
@@ -126,9 +114,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         paint.setTextSize(30);
 
         //Sprite animation init
-        stone_anim = new SpriteAnimation(BitmapFactory.decodeResource(getResources(), R.drawable.flystone), 320, 64, 5, 5);
-        stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
-        stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
+        stickman_anim = new SpriteAnimation(BitmapFactory.decodeResource(getResources(),R.drawable.stickman_sprite),50,480,32,32);
 
         // Create the game loop thread
         myThread = new GameThread(getHolder(), this);
@@ -180,17 +166,17 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
         canvas.drawBitmap(scaledbg, bgX, bgY, null);
         canvas.drawBitmap(scaledbg, bgX + ScreenWidth, bgY, null);
-        // 4d) Draw the spaceships
-        canvas.drawBitmap(ship[shipindex], mX, mY, null);
 
         //FPS
         canvas.drawText("FPS:" + FPS, 130, 75, paint);
-        canvas.drawText("ScreenHeight:" + ScreenHeight, 130, 100, paint);
-        canvas.drawText("ScreenWidth:" + ScreenWidth, 130, 125, paint);
+
         //Score
         canvas.drawText("Score:" + score, 800, 75, paint);
 
-        stone_anim.draw(canvas);
+        if(GameActive == false){
+            canvas.drawText("Game Over", 800, 500, paint);
+        }
+        stickman_anim.draw(canvas);
 
         for (int i = 0; i < obstacleList.length; ++i) {
             //Only draw if active
@@ -211,8 +197,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     bgX = 0;
                 }
 
-                shipindex++;
-                shipindex%=4;
                 SpawnTimer += dt;
                 timer += dt;
 
@@ -227,20 +211,21 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     SpawnTimer = 0.f;
                 }
 
-                stone_anim.update(System.currentTimeMillis());
-
-                if(CheckCollision(mX,mY,ship[shipindex].getWidth(),  ship[shipindex].getHeight(),
-                        stone_anim.getX(),stone_anim.getY(),stone_anim.getSpriteWidth(),stone_anim.getSpriteHeight()))
-                {
-                    stone_anim.setX(r.nextInt((ScreenWidth - 0) + 1) + 0);
-                    stone_anim.setY(r.nextInt((ScreenHeight - 0) + 1) + 0);
-                }
+                stickman_anim.update(System.currentTimeMillis());
 
                 //Updating game elements
                 for(int i = 0; i < obstacleList.length; ++i){
                     if(obstacleList[i].isActive()){
                         obstacleList[i].setPosX(obstacleList[i].getPosX() - ScrollSpeed * dt);
 
+                        if(CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
+                                stickman_anim.getSpriteWidth(),stickman_anim.getSpriteHeight(),
+                                (int)obstacleList[i].getPosX(),(int)obstacleList[i].getPosY(),
+                                obstacleList[i].getImgWidth(),obstacleList[i].getImgHeight()))
+                        {
+                            obstacleList[i].setActive(false);
+                            GameActive = false;
+                        }
                         //Get nearest non tap obstacle
                         if(obstacleList[i].getType() != Obstacle.TYPE.T_TAP) {
                             if (nearestObstacle.isActive() == false) {
