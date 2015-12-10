@@ -57,7 +57,8 @@ public class Splashpage extends Activity {
         splashTread.start();
     }
 
-    public boolean OnTouchEvent(MotionEvent event){
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
         if(event.getAction() == MotionEvent.ACTION_DOWN){
             _active = false;
         }
