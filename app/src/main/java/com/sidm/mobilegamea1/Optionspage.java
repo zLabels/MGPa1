@@ -2,6 +2,7 @@ package com.sidm.mobilegamea1;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,6 +13,7 @@ import android.widget.Button;
 public class Optionspage extends Activity implements OnClickListener{
 
     private Button btn_optionsback;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +27,15 @@ public class Optionspage extends Activity implements OnClickListener{
 
         btn_optionsback = (Button)findViewById(R.id.btn_optionsback);
         btn_optionsback.setOnClickListener(this);
+
+        mp = MediaPlayer.create(this, R.raw.menu_feedback);
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
+
+        mp.start();
 
         if(v == btn_optionsback)
         {

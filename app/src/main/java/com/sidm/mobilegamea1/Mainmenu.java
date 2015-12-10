@@ -3,7 +3,6 @@ package com.sidm.mobilegamea1;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -17,6 +16,7 @@ public class Mainmenu extends Activity implements OnClickListener{
     private Button btn_options;
     private Button btn_highscore;
     MediaPlayer mp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
