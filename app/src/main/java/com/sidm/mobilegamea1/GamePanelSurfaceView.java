@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -26,7 +27,12 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     // Variables for FPS
     public float FPS = 0.f;
     Paint paint = new Paint(); //Used for text rendering
+
+    //Feedback
     MediaPlayer mp; //Button Feedback
+    public Vibrator v;
+    float vibrateTime = 0.f;
+    float MaxVibrateTime = 0.5f;
 
     private SpriteAnimation stickman_anim;
     Random r = new Random();
@@ -192,6 +198,17 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     }
                     stickman_anim.update(System.currentTimeMillis());
                 }
+                //Feedback for game over
+                if(GameActive == false){
+                    vibrateTime += dt;
+                    if(vibrateTime > MaxVibrateTime) {
+                        stopVibrate();
+                    }
+                    else {
+                        startVibrate();
+                    }
+
+                }
 
                 if(nearestObstacle.isActive())
                 {
@@ -229,7 +246,8 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                             if (CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
                                     stickman_anim.getSpriteWidth(), stickman_anim.getSpriteHeight(),
                                     (int) obstacleList[i].getPosX(), (int) obstacleList[i].getPosY(),
-                                    obstacleList[i].getImgWidth(), obstacleList[i].getImgHeight())) {
+                                    obstacleList[i].getImgWidth(), obstacleList[i].getImgHeight()))
+                            {
                                 obstacleList[i].setActive(false);
                                 GameActive = false; //Game status set to false
                                 //Enable buttons
@@ -455,6 +473,16 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    //Vibration
+    public void startVibrate(){
+        long pattern[] = {0,500,500};
+        v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(pattern,0);
+    }
+    public void stopVibrate(){
+        v.cancel();
+    }
+
     //Restart game variables
     public void Reset()
     {
@@ -475,6 +503,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         Mainmenu_button.setActive(false);
         Tapped = false;
         FingerDown = false;
+        vibrateTime = 0.f;
         //Reset everything first before we set game active back to true
         GameActive = true;
     }
