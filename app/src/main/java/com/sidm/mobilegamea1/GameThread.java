@@ -18,8 +18,8 @@ public class GameThread extends Thread {
     int frameCount;
     long lastTime = 0;
     long lastFPSTime = 0;
-    float fps;
-    float dt;
+    float fps = 0.f;
+    float dt = 0.f;
 
     // Constructor for this class
     public GameThread(SurfaceHolder holder, GamePanelSurfaceView myView){

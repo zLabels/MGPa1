@@ -2,6 +2,7 @@ package com.sidm.mobilegamea1;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,9 +11,9 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 import java.util.Random;
+
 
 public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     // Implement this interface to receive information about changes to the surface.
@@ -21,12 +22,9 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private Bitmap bg, scaledbg;    //Used for background
     int ScreenWidth, ScreenHeight;  //Define Screen width and Screen height
     private short bgX = 0, bgY = 0;  //Variables for defining background start and end point
-    short ScrollSpeed = 500;    //Speed of background scrolling
-    float timer = 0.f;
-    int score = 0;
 
     // Variables for FPS
-    public float FPS = 0;
+    public float FPS = 0.f;
     float deltaTime;
     long dt;
     Paint paint = new Paint(); //Used for text rendering
@@ -44,12 +42,24 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     boolean FingerDown = false;
 
     //Game elements
-    private Obstacle[] obstacleList = new Obstacle[20];
-    float SpawnRate = 0.5f;
-    float SpawnTimer = 0.f;
+    private Obstacle[] obstacleList = new Obstacle[20]; //List of all obstacles
+    float SpawnRate = 0.5f; //Rate for each obstacle to spawn
+    float SpawnTimer = 0.f; //track time to spawn
     private Obstacle nearestObstacle;
+    short ScrollSpeed = 500;    //Speed of background scrolling
+    float timer = 0.f;  //Timer to increase speed
+    int score = 0;  //Play score
 
     private boolean GameActive = true;
+
+    //In game buttons
+    private InGameButton Restart_button = new InGameButton(500,650,
+            BitmapFactory.decodeResource(getResources(),R.drawable.restart_ingamebutton),false);
+    private InGameButton Mainmenu_button = new InGameButton(1150,650,
+            BitmapFactory.decodeResource(getResources(),R.drawable.mainmenu_ingamebutton),false);
+    //In game screen
+    private InGameScreens Gameover_screen = new InGameScreens(400,200,
+            BitmapFactory.decodeResource(getResources(),R.drawable.gameover_screen));;
 
     //constructor for this GamePanelSurfaceView class
     public GamePanelSurfaceView(Context context) {
@@ -98,7 +108,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             myThread.start();
         }
     }
-
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Destroy the thread
         if (myThread.isAlive()) {
@@ -115,7 +124,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             }
         }
     }
-
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
     }
 
@@ -133,16 +141,27 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         //Score
         canvas.drawText("Score:" + score, 800, 75, paint);
 
-        if(GameActive == false){
-            canvas.drawText("Game Over", 800, 500, paint);
+        if(GameActive)
+        {
+            //Score
+            canvas.drawText("Score:" + score, 800, 75, paint);
+            stickman_anim.draw(canvas);
         }
-        stickman_anim.draw(canvas);
 
         for (int i = 0; i < obstacleList.length; ++i) {
             //Only draw if active
             if (obstacleList[i].isActive()) {
                 canvas.drawBitmap(obstacleList[i].getObstacle(), obstacleList[i].getPosX(), obstacleList[i].getPosY(), null);
             }
+        }
+
+        //Game is lost
+        if(GameActive == false){
+            canvas.drawBitmap(Gameover_screen.getImage(),Gameover_screen.getPosX(),Gameover_screen.getPosY(),null);
+            canvas.drawBitmap(Restart_button.getImage(),Restart_button.getPosX(),Restart_button.getPosY(),null);
+            canvas.drawBitmap(Mainmenu_button.getImage(),Mainmenu_button.getPosX(),Mainmenu_button.getPosY(),null);
+            //Score
+            canvas.drawText("Score:" + score, 800, 500, paint);
         }
     }
 
@@ -157,63 +176,70 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     bgX = 0;
                 }
 
-                SpawnTimer += dt;
-                timer += dt;
+                if(GameActive) {
+                    SpawnTimer += dt;
+                    timer += dt;
 
-                if(timer > 5.f)
-                {
-                    ScrollSpeed += 100;
-                    timer = 0;
+                    if (timer > 5.f) {
+                        ScrollSpeed += 100;
+                        timer = 0;
+                    }
+                    if (SpawnTimer > SpawnRate) {
+                        FetchObstacle();
+                        SpawnTimer = 0.f;
+                    }
+                    stickman_anim.update(System.currentTimeMillis());
                 }
-                if(SpawnTimer > SpawnRate)
-                {
-                    FetchObstacle();
-                    SpawnTimer = 0.f;
-                }
 
-                stickman_anim.update(System.currentTimeMillis());
-
-                // Detecting user tap for tapping obstacle
-                if(nearestObstacle.getType() == Obstacle.TYPE.T_TAP && Tapped == true)
+                if(nearestObstacle.isActive())
                 {
-                    score += 10;
-                    nearestObstacle.setActive(false);
+                    // Detecting user tap for tapping obstacle
+                    if (nearestObstacle.getType() == Obstacle.TYPE.T_TAP && Tapped == true) {
+                        score += 10;
+                        nearestObstacle.setActive(false);
+                        DirectionVector.SetZero();
+                        Tapped = false;
+                    }
+                    // Detecting user swipe direction for direction obstacle
+                    else if (DirectionVector.IsZero() == false && Obstacle.fromInteger(ProcessSwipe(DirectionVector)) == nearestObstacle.getType()) {
+                        score += 10;
+                        nearestObstacle.setActive(false);
+                        DirectionVector.SetZero();
+                    }
+
                     DirectionVector.SetZero();
-                    Tapped = false;
-                }
-                // Detecting user swipe direction for direction obstacle
-                else if(DirectionVector.IsZero() == false && Obstacle.fromInteger(ProcessSwipe(DirectionVector)) == nearestObstacle.getType())
-                {
-                    score += 10;
-                    nearestObstacle.setActive(false);
-                    DirectionVector.SetZero();
                 }
 
-                DirectionVector.SetZero();
 
                 //Updating game elements
-                for(int i = 0; i < obstacleList.length; ++i){
-                    if(obstacleList[i].isActive()){
+                for(int i = 0; i < obstacleList.length; ++i)
+                {
+                    if(obstacleList[i].isActive())
+                    {
                         obstacleList[i].setPosX(obstacleList[i].getPosX() - ScrollSpeed * dt);
-
-                        if(CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
-                                stickman_anim.getSpriteWidth(),stickman_anim.getSpriteHeight(),
-                                (int)obstacleList[i].getPosX(),(int)obstacleList[i].getPosY(),
-                                obstacleList[i].getImgWidth(),obstacleList[i].getImgHeight()))
-                        {
+                        //if out of screen
+                        if(obstacleList[i].getPosX() < 0){
                             obstacleList[i].setActive(false);
-                            GameActive = false;
                         }
-                        //Get nearest obstacle
+                        //Only if game is active we check these collisions
+                        if(GameActive == true) {
+                            //Player collision against obstacles
+                            if (CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
+                                    stickman_anim.getSpriteWidth(), stickman_anim.getSpriteHeight(),
+                                    (int) obstacleList[i].getPosX(), (int) obstacleList[i].getPosY(),
+                                    obstacleList[i].getImgWidth(), obstacleList[i].getImgHeight())) {
+                                obstacleList[i].setActive(false);
+                                GameActive = false; //Game status set to false
+                                //Enable buttons
+                                Restart_button.setActive(true);
+                                Mainmenu_button.setActive(true);
+                            }
+                            //Get nearest obstacle
                             if (nearestObstacle.isActive() == false) {
                                 nearestObstacle = obstacleList[i];
                             } else if (obstacleList[i].getPosX() < nearestObstacle.getPosX()) {
                                 nearestObstacle = obstacleList[i];
                             }
-
-                        //if out of screen
-                        if(obstacleList[i].getPosX() < 0){
-                            obstacleList[i].setActive(false);
                         }
                     }
                 }
@@ -257,88 +283,108 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         return false;
     }
 
+    public boolean CheckTouch(float touch_x,float touch_y, float min_x,float min_y, int max_x,int max_y)
+    {
+        if(touch_x >= min_x && touch_x <= max_x && touch_y >= min_y && touch_y <= max_y){
+            return true;
+        }
+        return false;
+    }
+
     public void FetchObstacle()
     {
         for(int i = 0; i < obstacleList.length; ++i){
             if(obstacleList[i].isActive() == false){
                 int result = r.nextInt((100 - 0) + 1) + 0;
                 if(result >= 80) {
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.tap_obstacle), Obstacle.TYPE.T_TAP, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.tap_obstacle2), Obstacle.TYPE.T_TAP, 10, true);
                     break;
                 }
                 else if(result >=60 && result < 80){
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.left_obstacle), Obstacle.TYPE.T_LEFT, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.left_obstacle2), Obstacle.TYPE.T_LEFT, 10, true);
                     break;
                 }
                 else if(result >=40 && result < 60){
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.up_obstacle), Obstacle.TYPE.T_UP, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.up_obstacle2), Obstacle.TYPE.T_UP, 10, true);
                     break;
                 }
                 else if(result >=20 && result < 40){
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.down_obstacle), Obstacle.TYPE.T_DOWN, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.down_obstacle2), Obstacle.TYPE.T_DOWN, 10, true);
                     break;
                 }
                 else if(result >=0 && result < 20){
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.right_obstacle), Obstacle.TYPE.T_RIGHT, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.right_obstacle2), Obstacle.TYPE.T_RIGHT, 10, true);
                     break;
                 }
                 else{
-                    obstacleList[i].SetAllData(ScreenWidth, 425, BitmapFactory.decodeResource(getResources(),
-                            R.drawable.tap_obstacle), Obstacle.TYPE.T_TAP, 10, true);
+                    obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
+                            R.drawable.tap_obstacle2), Obstacle.TYPE.T_TAP, 10, true);
                     break;
                 }
-            }
-        }
-    }
-
-    public void ScreenTap(int X, int Y){
-
-        for(int i = 0; i < obstacleList.length; ++i) {
-            //Only check against active objects
-            if(obstacleList[i].isActive() && obstacleList[i].getType() == Obstacle.TYPE.T_TAP)
-            {
-                obstacleList[i].setActive(false);
-                score += 10;
             }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event){
-        // If the next obstacle is not a tap type check for swipe
-        if(nearestObstacle.getType() != Obstacle.TYPE.T_TAP && FingerDown == false) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN: {
-                    InitialPos.Set(event.getX(), event.getY());
+        //Only process if game is active
+        if(GameActive)
+        {
+            // If the next obstacle is not a tap type check for swipe
+            if (nearestObstacle.getType() != Obstacle.TYPE.T_TAP && FingerDown == false) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        InitialPos.Set(event.getX(), event.getY());
+                    }
+                    break;
+                    case MotionEvent.ACTION_MOVE:
+                        LastPos.Set(event.getX(), event.getY());
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        DirectionVector.Set(LastPos.operatorMinus(InitialPos));
+                        break;
                 }
-                break;
-                case MotionEvent.ACTION_MOVE:
-                    LastPos.Set(event.getX(), event.getY());
-                    break;
-                case MotionEvent.ACTION_UP:
-                    DirectionVector.Set(LastPos.operatorMinus(InitialPos));
-                    break;
             }
+            // else check for tap
+            else {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    FingerDown = true;
+                    Tapped = true;
+                }
+                else if(event.getAction() == MotionEvent.ACTION_UP)
+                {
+                    FingerDown = false;
+                }
+            }
+            return true;
         }
-        // else check for tap
+        //To process other taps while game is not active
         else
         {
-            if(event.getAction() == MotionEvent.ACTION_DOWN)
-            {
-                FingerDown = true;
-                Tapped = true;
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                //If touch restart button
+                if(CheckTouch(event.getX(),event.getY(),Restart_button.getPosX(),Restart_button.getPosY(),
+                        (int)Restart_button.getPosX() + Restart_button.getImgWidth(), (int)Restart_button.getPosY() + Restart_button.getImgHeight()))
+                {
+                    //Restart the game
+                    Reset();
+                }
+                //If touch mainmenu button
+                else if(CheckTouch(event.getX(),event.getY(),Mainmenu_button.getPosX(),Mainmenu_button.getPosY(),
+                        (int)Mainmenu_button.getPosX() + Mainmenu_button.getImgWidth(), (int)Mainmenu_button.getPosY() + Mainmenu_button.getImgHeight()))
+                {
+                    //Intent intent = new Intent();
+                    //intent.setClass(getContext(),Mainmenu.class);
+                    //getContext().startActivity(intent);
+                }
             }
-            else if(event.getAction() == MotionEvent.ACTION_UP)
-            {
-                FingerDown = false;
-            }
+            return true;
         }
-        return true;
     }
 
     public int ProcessSwipe(Vector2 SwipeDirection) {
@@ -402,5 +448,29 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 }
             }
         }
+    }
+
+    //Restart game variables
+    public void Reset()
+    {
+        //Reset all game elements
+        for(int i = 0; i < obstacleList.length; ++i)
+        {
+            if(obstacleList[i].isActive()) {
+                obstacleList[i].setActive(false);
+            }
+        }
+        nearestObstacle = obstacleList[0];
+        SpawnRate = 0.5f;
+        SpawnTimer = 0.f;
+        ScrollSpeed = 500;
+        timer = 0.f;
+        score = 0;
+        Restart_button.setActive(false);
+        Mainmenu_button.setActive(false);
+        Tapped = false;
+        FingerDown = false;
+        //Reset everything first before we set game active back to true
+        GameActive = true;
     }
 }
