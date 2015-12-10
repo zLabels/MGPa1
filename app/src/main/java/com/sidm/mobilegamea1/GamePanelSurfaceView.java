@@ -11,9 +11,9 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.media.MediaPlayer;
 
 import java.util.Random;
-
 
 public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     // Implement this interface to receive information about changes to the surface.
@@ -25,9 +25,8 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
     // Variables for FPS
     public float FPS = 0.f;
-    float deltaTime;
-    long dt;
     Paint paint = new Paint(); //Used for text rendering
+    MediaPlayer mp; //Button Feedback
 
     private SpriteAnimation stickman_anim;
     Random r = new Random();
@@ -77,6 +76,9 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         bg = BitmapFactory.decodeResource(getResources(),
                 R.drawable.game_background);
         scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
+
+        //Media Players
+        mp = MediaPlayer.create(getContext(), R.raw.menu_feedback);
 
         //Text rendering values
         paint.setARGB(255, 0, 0, 0);
@@ -372,15 +374,18 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         (int)Restart_button.getPosX() + Restart_button.getImgWidth(), (int)Restart_button.getPosY() + Restart_button.getImgHeight()))
                 {
                     //Restart the game
+                    mp.start();
                     Reset();
                 }
                 //If touch mainmenu button
                 else if(CheckTouch(event.getX(),event.getY(),Mainmenu_button.getPosX(),Mainmenu_button.getPosY(),
                         (int)Mainmenu_button.getPosX() + Mainmenu_button.getImgWidth(), (int)Mainmenu_button.getPosY() + Mainmenu_button.getImgHeight()))
                 {
-                    //Intent intent = new Intent();
-                    //intent.setClass(getContext(),Mainmenu.class);
-                    //getContext().startActivity(intent);
+                    mp.start();
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(),Mainmenu.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    getContext().startActivity(intent);
                 }
             }
             return true;

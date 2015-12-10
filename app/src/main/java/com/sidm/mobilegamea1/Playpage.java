@@ -8,13 +8,17 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.media.MediaPlayer;
 
 public class Playpage extends Activity implements OnClickListener{
 
+    //Buttons
     private Button btn_playback;
     private Button btn_adventure;
     private Button btn_endless;
     private Button btn_tutorial;
+    //Media Player
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +42,14 @@ public class Playpage extends Activity implements OnClickListener{
         btn_tutorial = (Button)findViewById(R.id.btn_tutorial);
         btn_tutorial.setOnClickListener(this);
 
+        mp = MediaPlayer.create(this, R.raw.menu_feedback);
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
+
+        mp.start();
 
         if(v == btn_playback)
         {

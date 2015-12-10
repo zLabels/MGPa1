@@ -2,6 +2,7 @@ package com.sidm.mobilegamea1;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -9,9 +10,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
+
 public class Highscorepage extends Activity implements OnClickListener{
 
     private Button btn_highscoreback;
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,11 +28,15 @@ public class Highscorepage extends Activity implements OnClickListener{
 
         btn_highscoreback = (Button)findViewById(R.id.btn_highscoreback);
         btn_highscoreback.setOnClickListener(this);
+
+        mp = MediaPlayer.create(this, R.raw.menu_feedback);
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
+
+        mp.start();
 
         if(v == btn_highscoreback)
         {

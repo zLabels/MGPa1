@@ -48,7 +48,7 @@ public class Splashpage extends Activity {
 
                     // Add codes
                     Intent intent = new Intent(Splashpage.this, Mainmenu.class);
-
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
             }
