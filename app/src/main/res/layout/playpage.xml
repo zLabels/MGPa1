@@ -15,27 +15,31 @@
         android:layout_marginTop="7dp" />
 
     <Button
-        android:id = "@+id/btn_adventure"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:background="@drawable/adventurebutton"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="70dp" />
+        android:id = "@+id/btn_endless"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
+        android:background="@drawable/endlessbutton"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp" />
 
     <Button
-        android:id = "@+id/btn_endless"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:background="@drawable/endlessbutton"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="160dp" />
+        android:id = "@+id/btn_adventure"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@drawable/adventurebutton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/btn_endless"
+        android:layout_marginEnd="97dp" />
 
     <Button
         android:id = "@+id/btn_tutorial"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:background="@drawable/tutorialbutton"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="250dp" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/btn_endless"
+        android:layout_marginStart="105dp" />
+
 
 </RelativeLayout>

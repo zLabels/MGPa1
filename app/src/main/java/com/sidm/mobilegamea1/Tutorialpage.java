@@ -10,13 +10,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.media.MediaPlayer;
 
-public class Playpage extends Activity implements OnClickListener{
+public class Tutorialpage extends Activity implements OnClickListener{
 
     //Buttons
-    private Button btn_playback;
-    private Button btn_adventure;
-    private Button btn_endless;
-    private Button btn_tutorial;
+    private Button btn_tutorialback;
+
     //Media Player
     MediaPlayer mp;
 
@@ -28,19 +26,10 @@ public class Playpage extends Activity implements OnClickListener{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
-        setContentView(R.layout.playpage);
+        setContentView(R.layout.tutorialpage);
 
-        btn_playback = (Button)findViewById(R.id.btn_playback);
-        btn_playback.setOnClickListener(this);
-
-        btn_adventure = (Button)findViewById(R.id.btn_adventure);
-        btn_adventure.setOnClickListener(this);
-
-        btn_endless = (Button)findViewById(R.id.btn_endless);
-        btn_endless.setOnClickListener(this);
-
-        btn_tutorial = (Button)findViewById(R.id.btn_tutorial);
-        btn_tutorial.setOnClickListener(this);
+        btn_tutorialback = (Button)findViewById(R.id.btn_tutorialback);
+        btn_tutorialback.setOnClickListener(this);
 
         mp = MediaPlayer.create(this, R.raw.menu_feedback);
     }
@@ -51,21 +40,9 @@ public class Playpage extends Activity implements OnClickListener{
 
         mp.start();
 
-        if(v == btn_playback)
+        if(v == btn_tutorialback)
         {
-            intent.setClass(this,Mainmenu.class);
-        }
-        if(v == btn_adventure)
-        {
-            intent.setClass(this,GamePage.class);
-        }
-        if(v == btn_endless)
-        {
-            intent.setClass(this,GamePage.class);
-        }
-        if(v == btn_tutorial)
-        {
-            intent.setClass(this,Tutorialpage.class);
+            intent.setClass(this,Playpage.class);
         }
 
         startActivity(intent);
