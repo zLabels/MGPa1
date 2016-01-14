@@ -1,6 +1,7 @@
 package com.sidm.mobilegamea1;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -26,6 +27,11 @@ public class Mainmenu extends Activity implements OnClickListener{
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
         setContentView(R.layout.mainmenu);
+
+        Context context = getApplicationContext();
+        AppPrefs appPrefs = new AppPrefs(context);
+
+        appPrefs.CheckIfExist();
 
         mp = MediaPlayer.create(this, R.raw.menu_feedback);
 

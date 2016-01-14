@@ -14,4 +14,46 @@
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp" />
 
+    <SeekBar
+        android:id="@+id/sb_backgroundMusicSeekbar"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="1"
+        android:progressDrawable="@android:color/black"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/btn_optionsback"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:id="@+id/tv_backgroundMusic"
+        android:layout_below="@+id/btn_optionsback"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <SeekBar
+        android:id="@+id/sb_sfxSoundSeekbar"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="1"
+        android:progressDrawable="@android:color/black"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/sb_backgroundMusicSeekbar"
+        android:layout_marginBottom="85dp" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:id="@+id/tv_sfxSound"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignBottom="@+id/sb_sfxSoundSeekbar"
+        android:layout_alignStart="@+id/tv_backgroundMusic" />
+
 </RelativeLayout>

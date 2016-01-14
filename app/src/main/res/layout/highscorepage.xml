@@ -14,4 +14,72 @@
         android:layout_marginStart="7dp"
         android:layout_marginTop="7dp" />
 
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:id="@+id/imageView"
+        android:background="#ffffff"
+        android:layout_below="@+id/btn_highscoreback"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="22dp"
+        android:id="@+id/tv_score1"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="25dp" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="22dp"
+        android:id="@+id/tv_score2"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="65dp" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="22dp"
+        android:id="@+id/tv_score3"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="105dp" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="22dp"
+        android:id="@+id/tv_score4"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="145dp" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="22dp"
+        android:id="@+id/tv_score5"
+        android:textAlignment="textStart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="185dp" />
+
 </RelativeLayout>
