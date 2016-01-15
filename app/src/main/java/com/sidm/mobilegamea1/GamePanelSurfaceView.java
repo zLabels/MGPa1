@@ -56,15 +56,22 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     int score = 0;  //Play score
 
     private boolean GameActive = true;
+    private boolean GamePaused = false;
 
     //In game buttons
     private InGameButton Restart_button = new InGameButton(500,650,
             BitmapFactory.decodeResource(getResources(),R.drawable.restart_ingamebutton),false);
     private InGameButton Mainmenu_button = new InGameButton(1150,650,
             BitmapFactory.decodeResource(getResources(),R.drawable.mainmenu_ingamebutton),false);
+    private InGameButton Pause_button = new InGameButton(1800,30,
+            BitmapFactory.decodeResource(getResources(),R.drawable.pauseicon),false);
+    private InGameButton Unpause_button = new InGameButton(825,650,
+            BitmapFactory.decodeResource(getResources(),R.drawable.unpause_ingamebutton),false);
     //In game screen
     private InGameScreens Gameover_screen = new InGameScreens(400,200,
-            BitmapFactory.decodeResource(getResources(),R.drawable.gameover_screen));;
+            BitmapFactory.decodeResource(getResources(),R.drawable.gameover_screen));
+    private InGameScreens Pause_screen = new InGameScreens(400,200,
+            BitmapFactory.decodeResource(getResources(),R.drawable.pause_screen));;
 
     //constructor for this GamePanelSurfaceView class
     public GamePanelSurfaceView(Context context) {
@@ -154,13 +161,25 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             //Score
             canvas.drawText("Score:" + score, 800, 75, paint);
             stickman_anim.draw(canvas);
+
+            //Pause button
+            canvas.drawBitmap(Pause_button.getImage(), Pause_button.getPosX(), Pause_button.getPosY(), null);
         }
 
+        //Obstacles
         for (int i = 0; i < obstacleList.length; ++i) {
             //Only draw if active
             if (obstacleList[i].isActive()) {
                 canvas.drawBitmap(obstacleList[i].getObstacle(), obstacleList[i].getPosX(), obstacleList[i].getPosY(), null);
             }
+        }
+
+        //Game is paused
+        if(GamePaused)
+        {
+            //Paused Game
+            canvas.drawBitmap(Pause_screen.getImage(), Pause_screen.getPosX(), Pause_screen.getPosY(), null);
+            canvas.drawBitmap(Unpause_button.getImage(), Unpause_button.getPosX(), Unpause_button.getPosY(), null);
         }
 
         //Game is lost
@@ -179,86 +198,85 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         switch (GameState) {
             case 0: {
-                bgX -= ScrollSpeed * dt; //Speed of background scrolling
-                if (bgX < -ScreenWidth){
-                    bgX = 0;
-                }
-
-                if(GameActive) {
-                    SpawnTimer += dt;
-                    timer += dt;
-
-                    if (timer > 5.f) {
-                        ScrollSpeed += 100;
-                        timer = 0;
-                    }
-                    if (SpawnTimer > SpawnRate) {
-                        FetchObstacle();
-                        SpawnTimer = 0.f;
-                    }
-                    stickman_anim.update(System.currentTimeMillis());
-                }
-                //Feedback for game over
-                if(GameActive == false){
-                    vibrateTime += dt;
-                    if(vibrateTime > MaxVibrateTime) {
-                        stopVibrate();
-                    }
-                    else {
-                        startVibrate();
-                    }
-
-                }
-
-                if(nearestObstacle.isActive())
+                //Only if game is not paused
+                if (!GamePaused)
                 {
-                    // Detecting user tap for tapping obstacle
-                    if (nearestObstacle.getType() == Obstacle.TYPE.T_TAP && Tapped == true) {
-                        score += 10;
-                        nearestObstacle.setActive(false);
-                        DirectionVector.SetZero();
-                        Tapped = false;
-                    }
-                    // Detecting user swipe direction for direction obstacle
-                    else if (DirectionVector.IsZero() == false && Obstacle.fromInteger(ProcessSwipe(DirectionVector)) == nearestObstacle.getType()) {
-                        score += 10;
-                        nearestObstacle.setActive(false);
-                        DirectionVector.SetZero();
+                    bgX -= ScrollSpeed * dt; //Speed of background scrolling
+                    if (bgX < -ScreenWidth) {
+                        bgX = 0;
                     }
 
-                    DirectionVector.SetZero();
-                }
+                    if (GameActive) {
+                        SpawnTimer += dt;
+                        timer += dt;
 
-
-                //Updating game elements
-                for(int i = 0; i < obstacleList.length; ++i)
-                {
-                    if(obstacleList[i].isActive())
-                    {
-                        obstacleList[i].setPosX(obstacleList[i].getPosX() - ScrollSpeed * dt);
-                        //if out of screen
-                        if(obstacleList[i].getPosX() < 0){
-                            obstacleList[i].setActive(false);
+                        if (timer > 5.f) {
+                            ScrollSpeed += 100;
+                            timer = 0;
                         }
-                        //Only if game is active we check these collisions
-                        if(GameActive == true) {
-                            //Player collision against obstacles
-                            if (CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
-                                    stickman_anim.getSpriteWidth(), stickman_anim.getSpriteHeight(),
-                                    (int) obstacleList[i].getPosX(), (int) obstacleList[i].getPosY(),
-                                    obstacleList[i].getImgWidth(), obstacleList[i].getImgHeight()))
-                            {
+                        if (SpawnTimer > SpawnRate) {
+                            FetchObstacle();
+                            SpawnTimer = 0.f;
+                        }
+                        stickman_anim.update(System.currentTimeMillis());
+                    }
+                    //Feedback for game over
+                    if (GameActive == false) {
+                        vibrateTime += dt;
+                        if (vibrateTime > MaxVibrateTime) {
+                            stopVibrate();
+                        } else {
+                            startVibrate();
+                        }
+
+                    }
+
+                    if (nearestObstacle.isActive()) {
+                        // Detecting user tap for tapping obstacle
+                        if (nearestObstacle.getType() == Obstacle.TYPE.T_TAP && Tapped == true) {
+                            score += 10;
+                            nearestObstacle.setActive(false);
+                            DirectionVector.SetZero();
+                            Tapped = false;
+                        }
+                        // Detecting user swipe direction for direction obstacle
+                        else if (DirectionVector.IsZero() == false && Obstacle.fromInteger(ProcessSwipe(DirectionVector)) == nearestObstacle.getType()) {
+                            score += 10;
+                            nearestObstacle.setActive(false);
+                            DirectionVector.SetZero();
+                        }
+
+                        DirectionVector.SetZero();
+                    }
+
+
+                    //Updating game elements
+                    for (int i = 0; i < obstacleList.length; ++i) {
+                        if (obstacleList[i].isActive()) {
+                            obstacleList[i].setPosX(obstacleList[i].getPosX() - ScrollSpeed * dt);
+                            //if out of screen
+                            if (obstacleList[i].getPosX() < 0) {
                                 obstacleList[i].setActive(false);
-                                GameActive = false; //Game status set to false
-                                //Enable buttons
-                                Restart_button.setActive(true);
-                                Mainmenu_button.setActive(true);
                             }
-                            //Get nearest obstacle
-                            if (nearestObstacle.isActive() == false) {
-                                nearestObstacle = obstacleList[i];
-                            } else if (obstacleList[i].getPosX() < nearestObstacle.getPosX()) {
-                                nearestObstacle = obstacleList[i];
+                            //Only if game is active we check these collisions
+                            if (GameActive == true) {
+                                //Player collision against obstacles
+                                if (CheckCollision(stickman_anim.getX(), stickman_anim.getY(),
+                                        stickman_anim.getSpriteWidth(), stickman_anim.getSpriteHeight(),
+                                        (int) obstacleList[i].getPosX(), (int) obstacleList[i].getPosY(),
+                                        obstacleList[i].getImgWidth(), obstacleList[i].getImgHeight())) {
+                                    obstacleList[i].setActive(false);
+                                    GameActive = false; //Game status set to false
+                                    //Enable buttons
+                                    Restart_button.setActive(true);
+                                    Mainmenu_button.setActive(true);
+                                }
+                                //Get nearest obstacle
+                                if (nearestObstacle.isActive() == false) {
+                                    nearestObstacle = obstacleList[i];
+                                } else if (obstacleList[i].getPosX() < nearestObstacle.getPosX()) {
+                                    nearestObstacle = obstacleList[i];
+                                }
                             }
                         }
                     }
@@ -379,6 +397,23 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 else if(event.getAction() == MotionEvent.ACTION_UP)
                 {
                     FingerDown = false;
+                }
+            }
+
+            //Check if touch pause button
+            if (event.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                //If touch pause button
+                if (CheckTouch(event.getX(), event.getY(), Pause_button.getPosX(), Pause_button.getPosY(),
+                        (int) Pause_button.getPosX() + Pause_button.getImgWidth(), (int) Pause_button.getPosY() + Pause_button.getImgHeight())) {
+                    GamePaused = true;
+                }
+                if (GamePaused) {
+                    //If touch unpause button
+                    if (CheckTouch(event.getX(), event.getY(), Unpause_button.getPosX(), Unpause_button.getPosY(),
+                            (int) Unpause_button.getPosX() + Unpause_button.getImgWidth(), (int) Unpause_button.getPosY() + Unpause_button.getImgHeight())) {
+                        GamePaused = false;
+                    }
                 }
             }
             return true;
