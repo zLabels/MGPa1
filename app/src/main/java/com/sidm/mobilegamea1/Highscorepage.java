@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
@@ -45,6 +46,8 @@ public class Highscorepage extends Activity implements OnClickListener{
 
         scores = appPrefs.getHighscore();
 
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/LoveSweets.ttf");
+
         tv_scoreTexts = new Vector<TextView>();
 
         tv_scoreTexts.addElement((TextView) findViewById(R.id.tv_score1));
@@ -57,13 +60,14 @@ public class Highscorepage extends Activity implements OnClickListener{
 
         for(int i = 0; i < numScore; ++i)
         {
-            scoreStrings.addElement("1. " + scores.get(i));
+            scoreStrings.addElement(i + ". " + scores.get(i));
             tv_scoreTexts.get(i).setText(scoreStrings.get(i));
 
             Rect bounds = new Rect();
             Paint textPaint = tv_scoreTexts.get(i).getPaint();
             textPaint.getTextBounds(scoreStrings.get(i), 0, scoreStrings.get(i).length(), bounds);
             tv_scoreTexts.get(i).setWidth(bounds.width());
+            tv_scoreTexts.get(i).setTypeface(typeface);
         }
 
         btn_highscoreback = (Button)findViewById(R.id.btn_highscoreback);

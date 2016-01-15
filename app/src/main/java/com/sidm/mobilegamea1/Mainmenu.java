@@ -10,6 +10,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.media.MediaPlayer;
+import android.widget.TextView;
+
+import java.util.Vector;
 
 public class Mainmenu extends Activity implements OnClickListener{
 

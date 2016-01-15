@@ -37,18 +37,18 @@ public class Optionspage extends Activity implements OnClickListener{
         btn_optionsback = (Button)findViewById(R.id.btn_optionsback);
         btn_optionsback.setOnClickListener(this);
 
-       // Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/LoveSweets.ttf");
+       Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/LoveSweets.ttf");
 
         backgroundMusic = "Background Music";
         sfxSound = "SFX Sound";
 
         tv_backgroundMusic = (TextView)findViewById(R.id.tv_backgroundMusic);
         tv_backgroundMusic.setText(backgroundMusic);
-      //  tv_backgroundMusic.setTypeface(typeface);
+        tv_backgroundMusic.setTypeface(typeface);
 
         tv_sfxSound = (TextView)findViewById(R.id.tv_sfxSound);
         tv_sfxSound.setText(sfxSound);
-      //  tv_sfxSound.setTypeface(typeface);
+        tv_sfxSound.setTypeface(typeface);
 
         sb_backgroundMusic = (SeekBar) findViewById(R.id.sb_backgroundMusicSeekbar);
         sb_backgroundMusic.setOnSeekBarChangeListener(customSeekBarlistener);
