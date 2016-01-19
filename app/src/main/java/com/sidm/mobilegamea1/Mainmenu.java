@@ -3,6 +3,7 @@ package com.sidm.mobilegamea1;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +20,7 @@ public class Mainmenu extends Activity implements OnClickListener{
     private Button btn_play;
     private Button btn_options;
     private Button btn_highscore;
+    SoundManager soundManager;
     MediaPlayer mp;
 
     @Override
@@ -36,7 +38,13 @@ public class Mainmenu extends Activity implements OnClickListener{
 
         appPrefs.CheckIfExist();
 
-        mp = MediaPlayer.create(this, R.raw.menu_feedback);
+        soundManager = new SoundManager();
+
+        if(!soundManager.IsInited())
+        {
+            soundManager.InitSoundPool(context, appPrefs);
+            soundManager.PlayBGM();
+        }
 
         btn_play = (Button)findViewById(R.id.btn_play);
         btn_play.setOnClickListener(this);
@@ -51,7 +59,7 @@ public class Mainmenu extends Activity implements OnClickListener{
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        mp.start();
+        soundManager.PlaySFX();
 
         if(v == btn_play)
         {
@@ -70,7 +78,13 @@ public class Mainmenu extends Activity implements OnClickListener{
     }
 
     protected void onPause(){
+        //soundManager.PauseBGM();
         super.onPause();
+    }
+
+    protected void onResume(){
+        //soundManager.UnPauseBGM();
+        super.onResume();
     }
 
     protected void onStop(){

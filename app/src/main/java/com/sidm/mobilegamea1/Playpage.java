@@ -18,7 +18,7 @@ public class Playpage extends Activity implements OnClickListener{
     private Button btn_endless;
     private Button btn_tutorial;
     //Media Player
-    MediaPlayer mp;
+    SoundManager soundManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +42,14 @@ public class Playpage extends Activity implements OnClickListener{
         btn_tutorial = (Button)findViewById(R.id.btn_tutorial);
         btn_tutorial.setOnClickListener(this);
 
-        mp = MediaPlayer.create(this, R.raw.menu_feedback);
+        soundManager = new SoundManager();
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        mp.start();
+        soundManager.PlaySFX();
 
         if(v == btn_playback)
         {

@@ -22,7 +22,7 @@ public class Optionspage extends Activity implements OnClickListener{
     private TextView tv_backgroundMusic, tv_sfxSound;
     private String backgroundMusic, sfxSound;
     AppPrefs appPrefs;
-    MediaPlayer mp;
+    SoundManager soundManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +67,7 @@ public class Optionspage extends Activity implements OnClickListener{
 
         sb_sfxSound.setProgress(Volumes.get(1));
 
-        mp = MediaPlayer.create(this, R.raw.menu_feedback);
+        soundManager = new SoundManager();
     }
 
     private SeekBar.OnSeekBarChangeListener customSeekBarlistener = new SeekBar.OnSeekBarChangeListener() {
@@ -77,10 +77,12 @@ public class Optionspage extends Activity implements OnClickListener{
             if(seekBar == sb_backgroundMusic)
             {
                 appPrefs.setVolume(0, progress);
+                //soundManager.SetBGMVolume(progress);
             }
             else if(seekBar == sb_sfxSound)
             {
                 appPrefs.setVolume(1, progress);
+                //soundManager.SetSFXVolume(progress);
             }
         }
 
@@ -99,7 +101,7 @@ public class Optionspage extends Activity implements OnClickListener{
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        mp.start();
+        soundManager.PlaySFX();
 
         if(v == btn_optionsback)
         {

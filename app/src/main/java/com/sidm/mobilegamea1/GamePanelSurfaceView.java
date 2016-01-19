@@ -15,6 +15,7 @@ import android.view.SurfaceView;
 import android.media.MediaPlayer;
 
 import java.util.Random;
+import java.util.Vector;
 
 public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     // Implement this interface to receive information about changes to the surface.
@@ -29,7 +30,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     Paint paint = new Paint(); //Used for text rendering
 
     //Feedback
-    MediaPlayer mp; //Button Feedback
+    SoundManager soundManager;
     public Vibrator v;
     float vibrateTime = 0.f;
     float MaxVibrateTime = 0.5f;
@@ -54,6 +55,9 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     short ScrollSpeed = 500;    //Speed of background scrolling
     float timer = 0.f;  //Timer to increase speed
     int score = 0;  //Play score
+    boolean UpdateHighscore = true;
+
+    AppPrefs appPrefs;
 
     private boolean GameActive = true;
     private boolean GamePaused = false;
@@ -63,7 +67,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             BitmapFactory.decodeResource(getResources(),R.drawable.restart_ingamebutton),false);
     private InGameButton Mainmenu_button = new InGameButton(1150,650,
             BitmapFactory.decodeResource(getResources(),R.drawable.mainmenu_ingamebutton),false);
-    private InGameButton Pause_button = new InGameButton(1800,30,
+    private InGameButton Pause_button = new InGameButton(1700,30,
             BitmapFactory.decodeResource(getResources(),R.drawable.pauseicon),false);
     private InGameButton Unpause_button = new InGameButton(825,650,
             BitmapFactory.decodeResource(getResources(),R.drawable.unpause_ingamebutton),false);
@@ -91,7 +95,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         scaledbg = Bitmap.createScaledBitmap(bg, ScreenWidth, ScreenHeight, true);
 
         //Media Players
-        mp = MediaPlayer.create(getContext(), R.raw.menu_feedback);
+        soundManager = new SoundManager();
 
         //Text rendering values
         paint.setARGB(255, 0, 0, 0);
@@ -111,6 +115,8 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             obstacleList[i] = new Obstacle();
         }
         nearestObstacle = obstacleList[0];
+
+        appPrefs = new AppPrefs(context);
     }
 
 
@@ -222,6 +228,35 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     }
                     //Feedback for game over
                     if (GameActive == false) {
+
+                        if(UpdateHighscore){
+                            Vector<Integer> highscores = appPrefs.getHighscore();
+                            Vector<Integer> updatedscores = new Vector<Integer>();
+                            boolean scoreentered = false;
+                            int index = 0;
+
+                            for(int i = 0; i < highscores.size(); ++i)
+                            {
+                                if(score > highscores.get(index) && !scoreentered)
+                                {
+                                    updatedscores.addElement(score);
+                                    scoreentered = true;
+                                }
+                                else
+                                {
+                                    updatedscores.addElement(highscores.get(index));
+                                    ++index;
+                                }
+                            }
+
+                            for(int i = 0; i < updatedscores.size(); ++i)
+                            {
+                                appPrefs.setHighscore(i, updatedscores.get(i));
+                            }
+
+                            UpdateHighscore = false;
+                        }
+
                         vibrateTime += dt;
                         if (vibrateTime > MaxVibrateTime) {
                             stopVibrate();
@@ -371,7 +406,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     @Override
     public boolean onTouchEvent(MotionEvent event){
         //Only process if game is active
-        if(GameActive)
+        if(GameActive && !GamePaused)
         {
             // If the next obstacle is not a tap type check for swipe
             if (nearestObstacle.getType() != Obstacle.TYPE.T_TAP && FingerDown == false) {
@@ -408,12 +443,17 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         (int) Pause_button.getPosX() + Pause_button.getImgWidth(), (int) Pause_button.getPosY() + Pause_button.getImgHeight())) {
                     GamePaused = true;
                 }
-                if (GamePaused) {
-                    //If touch unpause button
-                    if (CheckTouch(event.getX(), event.getY(), Unpause_button.getPosX(), Unpause_button.getPosY(),
-                            (int) Unpause_button.getPosX() + Unpause_button.getImgWidth(), (int) Unpause_button.getPosY() + Unpause_button.getImgHeight())) {
-                        GamePaused = false;
-                    }
+            }
+            return true;
+        }
+
+        else if(GameActive && GamePaused)
+        {
+            if (event.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                if (CheckTouch(event.getX(), event.getY(), Unpause_button.getPosX(), Unpause_button.getPosY(),
+                        (int) Unpause_button.getPosX() + Unpause_button.getImgWidth(), (int) Unpause_button.getPosY() + Unpause_button.getImgHeight())) {
+                    GamePaused = false;
                 }
             }
             return true;
@@ -427,14 +467,14 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                         (int)Restart_button.getPosX() + Restart_button.getImgWidth(), (int)Restart_button.getPosY() + Restart_button.getImgHeight()))
                 {
                     //Restart the game
-                    mp.start();
+                    soundManager.PlaySFX();
                     Reset();
                 }
                 //If touch mainmenu button
                 else if(CheckTouch(event.getX(),event.getY(),Mainmenu_button.getPosX(),Mainmenu_button.getPosY(),
                         (int)Mainmenu_button.getPosX() + Mainmenu_button.getImgWidth(), (int)Mainmenu_button.getPosY() + Mainmenu_button.getImgHeight()))
                 {
-                    mp.start();
+                    soundManager.PlaySFX();
                     Intent intent = new Intent();
                     intent.setClass(getContext(),Mainmenu.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -539,6 +579,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         Tapped = false;
         FingerDown = false;
         vibrateTime = 0.f;
+        UpdateHighscore = true;
         //Reset everything first before we set game active back to true
         GameActive = true;
     }

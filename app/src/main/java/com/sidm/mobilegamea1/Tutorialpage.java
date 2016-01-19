@@ -16,7 +16,7 @@ public class Tutorialpage extends Activity implements OnClickListener{
     private Button btn_tutorialback;
 
     //Media Player
-    MediaPlayer mp;
+    SoundManager soundManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +31,14 @@ public class Tutorialpage extends Activity implements OnClickListener{
         btn_tutorialback = (Button)findViewById(R.id.btn_tutorialback);
         btn_tutorialback.setOnClickListener(this);
 
-        mp = MediaPlayer.create(this, R.raw.menu_feedback);
+        soundManager = new SoundManager();
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        mp.start();
+        soundManager.PlaySFX();
 
         if(v == btn_tutorialback)
         {

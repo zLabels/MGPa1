@@ -25,7 +25,7 @@ public class Highscorepage extends Activity implements OnClickListener{
     private Vector<String> scoreStrings;
     int numScore;
     AppPrefs appPrefs;
-    MediaPlayer mp;
+    SoundManager soundManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class Highscorepage extends Activity implements OnClickListener{
 
         for(int i = 0; i < numScore; ++i)
         {
-            scoreStrings.addElement(i + ". " + scores.get(i));
+            scoreStrings.addElement(i+1 + ". " + scores.get(i));
             tv_scoreTexts.get(i).setText(scoreStrings.get(i));
 
             Rect bounds = new Rect();
@@ -73,14 +73,14 @@ public class Highscorepage extends Activity implements OnClickListener{
         btn_highscoreback = (Button)findViewById(R.id.btn_highscoreback);
         btn_highscoreback.setOnClickListener(this);
 
-        mp = MediaPlayer.create(this, R.raw.menu_feedback);
+        soundManager = new SoundManager();
     }
 
     @Override
     public void onClick(View v) {
         Intent intent = new Intent();
 
-        mp.start();
+        soundManager.PlaySFX();
 
         if(v == btn_highscoreback)
         {
