@@ -56,13 +56,11 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     short BarSpeed = 35;
     float timer = 0.f;  //Timer to increase speed
     int score = 0;  //Play score
-<<<<<<< HEAD
+
     boolean UpdateHighscore = true;
 
     AppPrefs appPrefs;
-=======
     float DestinationPoint = 1600.0f; // For Adventure
->>>>>>> 5edb13fa96a06a044c30381a46a99dce82e901a1
 
     private boolean GameActive = true;
     private boolean GamePaused = false;
@@ -621,12 +619,9 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         Tapped = false;
         FingerDown = false;
         vibrateTime = 0.f;
-<<<<<<< HEAD
         UpdateHighscore = true;
-=======
         Progress_bar.setPosX(400);
         Win = false;
->>>>>>> 5edb13fa96a06a044c30381a46a99dce82e901a1
         //Reset everything first before we set game active back to true
         GameActive = true;
     }
