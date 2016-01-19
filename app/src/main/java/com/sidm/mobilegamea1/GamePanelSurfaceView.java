@@ -53,14 +53,22 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     float SpawnTimer = 0.f; //track time to spawn
     private Obstacle nearestObstacle;
     short ScrollSpeed = 500;    //Speed of background scrolling
+    short BarSpeed = 35;
     float timer = 0.f;  //Timer to increase speed
     int score = 0;  //Play score
+<<<<<<< HEAD
     boolean UpdateHighscore = true;
 
     AppPrefs appPrefs;
+=======
+    float DestinationPoint = 1600.0f; // For Adventure
+>>>>>>> 5edb13fa96a06a044c30381a46a99dce82e901a1
 
     private boolean GameActive = true;
     private boolean GamePaused = false;
+    private boolean Win = false;    //Will always lose if endless mode
+
+    private int GameMode = 0;   // 0 for Endless, 1 For Adventure
 
     //In game buttons
     private InGameButton Restart_button = new InGameButton(500,650,
@@ -71,14 +79,20 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             BitmapFactory.decodeResource(getResources(),R.drawable.pauseicon),false);
     private InGameButton Unpause_button = new InGameButton(825,650,
             BitmapFactory.decodeResource(getResources(),R.drawable.unpause_ingamebutton),false);
-    //In game screen
+    //In game screens
     private InGameScreens Gameover_screen = new InGameScreens(400,200,
             BitmapFactory.decodeResource(getResources(),R.drawable.gameover_screen));
+    private InGameScreens Win_screen = new InGameScreens(400,200,
+            BitmapFactory.decodeResource(getResources(),R.drawable.win_screen));
     private InGameScreens Pause_screen = new InGameScreens(400,200,
-            BitmapFactory.decodeResource(getResources(),R.drawable.pause_screen));;
+            BitmapFactory.decodeResource(getResources(),R.drawable.pause_screen));
+    private InGameScreens Progress_line = new InGameScreens(400,50,
+            BitmapFactory.decodeResource(getResources(),R.drawable.progess_line));
+    private InGameScreens Progress_bar = new InGameScreens(400,30,
+            BitmapFactory.decodeResource(getResources(),R.drawable.progress_bar));
 
     //constructor for this GamePanelSurfaceView class
-    public GamePanelSurfaceView(Context context) {
+    public GamePanelSurfaceView(Context context,int Mode) {
 
         // Context is the current state of the application/object
         super(context);
@@ -88,6 +102,9 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         ScreenWidth = metrics.widthPixels;
         ScreenHeight = metrics.heightPixels;
+
+        //Game Mode
+        GameMode = Mode;
 
         //Loading images when created
         bg = BitmapFactory.decodeResource(getResources(),
@@ -133,8 +150,6 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // Destroy the thread
         if (myThread.isAlive()) {
             myThread.startRun(false);
-
-
         }
         boolean retry = true;
         while (retry) {
@@ -157,19 +172,27 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         canvas.drawBitmap(scaledbg, bgX + ScreenWidth, bgY, null);
 
         //FPS
-        canvas.drawText("FPS:" + FPS, 130, 75, paint);
-
-        //Score
-        canvas.drawText("Score:" + score, 800, 75, paint);
-
+        canvas.drawText("FPS:" + FPS, 50, 75, paint);
+        
         if(GameActive)
         {
             //Score
-            canvas.drawText("Score:" + score, 800, 75, paint);
+            //Only show score if endless mode
+            if(GameMode == 0) {
+                //Score
+                canvas.drawText("Score:" + score, 800, 75, paint);
+            }
             stickman_anim.draw(canvas);
 
             //Pause button
             canvas.drawBitmap(Pause_button.getImage(), Pause_button.getPosX(), Pause_button.getPosY(), null);
+
+            //Adventure mode
+            if(GameMode == 1)
+            {
+                canvas.drawBitmap(Progress_line.getImage(), Progress_line.getPosX(), Progress_line.getPosY(), null);
+                canvas.drawBitmap(Progress_bar.getImage(), Progress_bar.getPosX(), Progress_bar.getPosY(), null);
+            }
         }
 
         //Obstacles
@@ -181,8 +204,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
 
         //Game is paused
-        if(GamePaused)
-        {
+        if (GamePaused) {
             //Paused Game
             canvas.drawBitmap(Pause_screen.getImage(), Pause_screen.getPosX(), Pause_screen.getPosY(), null);
             canvas.drawBitmap(Unpause_button.getImage(), Unpause_button.getPosX(), Unpause_button.getPosY(), null);
@@ -190,11 +212,20 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
 
         //Game is lost
         if(GameActive == false){
-            canvas.drawBitmap(Gameover_screen.getImage(),Gameover_screen.getPosX(),Gameover_screen.getPosY(),null);
+            if(Win)
+            {
+                canvas.drawBitmap(Win_screen.getImage(), Win_screen.getPosX(), Win_screen.getPosY(), null);
+            }
+            else {
+                canvas.drawBitmap(Gameover_screen.getImage(), Gameover_screen.getPosX(), Gameover_screen.getPosY(), null);
+                //Only if endless we display the score
+                if(GameMode == 0) {
+                    //Score
+                    canvas.drawText("Score:" + score, 800, 500, paint);
+                }
+            }
             canvas.drawBitmap(Restart_button.getImage(),Restart_button.getPosX(),Restart_button.getPosY(),null);
-            canvas.drawBitmap(Mainmenu_button.getImage(),Mainmenu_button.getPosX(),Mainmenu_button.getPosY(),null);
-            //Score
-            canvas.drawText("Score:" + score, 800, 500, paint);
+            canvas.drawBitmap(Mainmenu_button.getImage(), Mainmenu_button.getPosX(), Mainmenu_button.getPosY(),null);
         }
     }
 
@@ -225,6 +256,17 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                             SpawnTimer = 0.f;
                         }
                         stickman_anim.update(System.currentTimeMillis());
+
+                        //Adventure mode
+                        if(GameMode == 1)
+                        {
+                            Progress_bar.setPosX(Progress_bar.getPosX() + BarSpeed * 0.015f);
+                            if(Progress_bar.getPosX()  > DestinationPoint)
+                            {
+                                Win = true;
+                                GameActive = false;
+                            }
+                        }
                     }
                     //Feedback for game over
                     if (GameActive == false) {
@@ -579,7 +621,12 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         Tapped = false;
         FingerDown = false;
         vibrateTime = 0.f;
+<<<<<<< HEAD
         UpdateHighscore = true;
+=======
+        Progress_bar.setPosX(400);
+        Win = false;
+>>>>>>> 5edb13fa96a06a044c30381a46a99dce82e901a1
         //Reset everything first before we set game active back to true
         GameActive = true;
     }
