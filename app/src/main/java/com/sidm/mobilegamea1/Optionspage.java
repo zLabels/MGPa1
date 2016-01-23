@@ -77,12 +77,12 @@ public class Optionspage extends Activity implements OnClickListener{
             if(seekBar == sb_backgroundMusic)
             {
                 appPrefs.setVolume(0, progress);
-                //soundManager.SetBGMVolume(progress);
+                //
             }
             else if(seekBar == sb_sfxSound)
             {
                 appPrefs.setVolume(1, progress);
-                //soundManager.SetSFXVolume(progress);
+                //
             }
         }
 
@@ -105,6 +105,8 @@ public class Optionspage extends Activity implements OnClickListener{
 
         if(v == btn_optionsback)
         {
+            soundManager.SetBGMVolume(appPrefs.getVolume().get(0));
+            soundManager.SetSFXVolume(appPrefs.getVolume().get(1));
             intent.setClass(this,Mainmenu.class);
         }
 

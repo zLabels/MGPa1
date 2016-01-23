@@ -269,7 +269,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                     //Feedback for game over
                     if (GameActive == false) {
 
-                        if(UpdateHighscore){
+                        if(UpdateHighscore && GameMode == 0){
                             Vector<Integer> highscores = appPrefs.getHighscore();
                             Vector<Integer> updatedscores = new Vector<Integer>();
                             boolean scoreentered = false;
