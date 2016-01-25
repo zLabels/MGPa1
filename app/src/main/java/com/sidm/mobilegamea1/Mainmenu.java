@@ -3,6 +3,8 @@ package com.sidm.mobilegamea1;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +15,19 @@ import android.widget.Button;
 import android.media.MediaPlayer;
 import android.widget.TextView;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.facebook.share.ShareApi;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class Mainmenu extends Activity implements OnClickListener{
@@ -23,6 +38,14 @@ public class Mainmenu extends Activity implements OnClickListener{
     SoundManager soundManager;
     MediaPlayer mp;
 
+    TextView userName;
+    private LoginButton loginBtn;
+    AppPrefs appPrefs;
+
+    private CallbackManager callbackManager;
+    private LoginManager loginManager;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,10 +54,39 @@ public class Mainmenu extends Activity implements OnClickListener{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
+        Context context = getApplicationContext();
+        FacebookSdk.sdkInitialize(this.getApplicationContext());
+        FacebookSdk.setApplicationId(getResources().getString(R.string.app_id));
         setContentView(R.layout.mainmenu);
 
-        Context context = getApplicationContext();
-        AppPrefs appPrefs = new AppPrefs(context);
+        callbackManager = CallbackManager.Factory.create();
+
+        List<String> PERMISSIONS = Arrays.asList("publish_actions");
+
+        userName = (TextView) findViewById(R.id.user_name);
+        loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
+        loginManager = LoginManager.getInstance();
+        loginManager.logInWithPublishPermissions(this, PERMISSIONS);
+        loginBtn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                sharePhotoToFacebook();
+            }
+
+            @Override
+            public void onCancel() {
+                userName.setText("Login attempt canceled.");
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                userName.setText("Login attempt failed.");
+            }
+        });
+
+        //Context context = getApplicationContext();
+        appPrefs = new AppPrefs(context);
 
         appPrefs.CheckIfExist();
 
@@ -54,6 +106,32 @@ public class Mainmenu extends Activity implements OnClickListener{
 
         btn_highscore = (Button)findViewById(R.id.btn_highscore);
         btn_highscore.setOnClickListener(this);
+    }
+
+    private void sharePhotoToFacebook(){
+        int highscore = 0;
+
+        highscore = appPrefs.getHighscore().get(0);
+
+        Bitmap image = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        SharePhoto photo = new SharePhoto.Builder()
+                .setBitmap(image)
+                .setCaption("You have played DoodleRun. Your current Score is " + highscore + ".")
+                .build();
+
+        SharePhotoContent content = new SharePhotoContent.Builder()
+                .addPhoto(photo)
+                .build();
+
+        ShareApi.share(content, null);
+
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     public void onClick(View v) {
