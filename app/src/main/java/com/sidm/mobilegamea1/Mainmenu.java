@@ -32,16 +32,22 @@ import java.util.Vector;
 
 public class Mainmenu extends Activity implements OnClickListener{
 
+    //Buttons
     private Button btn_play;
     private Button btn_options;
     private Button btn_highscore;
-    SoundManager soundManager;
-    MediaPlayer mp;
 
+    //Sound manager
+    SoundManager soundManager;
+
+    //Facebook
     TextView userName;
     private LoginButton loginBtn;
+
+    //Share prefs
     AppPrefs appPrefs;
 
+    //Managers
     private CallbackManager callbackManager;
     private LoginManager loginManager;
 
@@ -55,6 +61,7 @@ public class Mainmenu extends Activity implements OnClickListener{
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //hide top bar
 
         Context context = getApplicationContext();
+        //Initializing facebook
         FacebookSdk.sdkInitialize(this.getApplicationContext());
         FacebookSdk.setApplicationId(getResources().getString(R.string.app_id));
         setContentView(R.layout.mainmenu);
@@ -85,6 +92,7 @@ public class Mainmenu extends Activity implements OnClickListener{
             }
         });
 
+
         //Context context = getApplicationContext();
         appPrefs = new AppPrefs(context);
 
@@ -92,12 +100,14 @@ public class Mainmenu extends Activity implements OnClickListener{
 
         soundManager = new SoundManager();
 
+        //Checking if sound manager is made
         if(!soundManager.IsInited())
         {
             soundManager.InitSoundPool(context, appPrefs);
             soundManager.PlayBGM();
         }
 
+        //Initializing buttons
         btn_play = (Button)findViewById(R.id.btn_play);
         btn_play.setOnClickListener(this);
 
@@ -108,15 +118,18 @@ public class Mainmenu extends Activity implements OnClickListener{
         btn_highscore.setOnClickListener(this);
     }
 
+    //Sharing photo to facebook
     private void sharePhotoToFacebook(){
         int highscore = 0;
 
+        //Getting highest score
         highscore = appPrefs.getHighscore().get(0);
 
+        //Setting image as launcher icon
         Bitmap image = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         SharePhoto photo = new SharePhoto.Builder()
                 .setBitmap(image)
-                .setCaption("You have played DoodleRun. Your current Score is " + highscore + ".")
+                .setCaption("I'm playing Doodle Run! My highest score is " + highscore + ".")
                 .build();
 
         SharePhotoContent content = new SharePhotoContent.Builder()
@@ -124,7 +137,6 @@ public class Mainmenu extends Activity implements OnClickListener{
                 .build();
 
         ShareApi.share(content, null);
-
     }
 
 
@@ -134,11 +146,13 @@ public class Mainmenu extends Activity implements OnClickListener{
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    //On tapping one of the mainmenu buttons
     public void onClick(View v) {
         Intent intent = new Intent();
 
         soundManager.PlaySFX();
 
+        //Setting intent based on button input
         if(v == btn_play)
         {
             intent.setClass(this,Playpage.class);
@@ -152,6 +166,7 @@ public class Mainmenu extends Activity implements OnClickListener{
             intent.setClass(this,Highscorepage.class);
         }
 
+        //Start the new activity
         startActivity(intent);
     }
 

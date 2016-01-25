@@ -35,7 +35,10 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     float vibrateTime = 0.f;
     float MaxVibrateTime = 0.5f;
 
+    //Stick man animation
     private SpriteAnimation stickman_anim;
+
+    //Random
     Random r = new Random();
 
     private short GameState;    // Variable for Game State check
@@ -51,19 +54,21 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
     private Obstacle[] obstacleList = new Obstacle[20]; //List of all obstacles
     float SpawnRate = 0.5f; //Rate for each obstacle to spawn
     float SpawnTimer = 0.f; //track time to spawn
-    private Obstacle nearestObstacle;
+    private Obstacle nearestObstacle;   //Nearest obstacle to player
     short ScrollSpeed = 500;    //Speed of background scrolling
-    short BarSpeed = 35;
+    short BarSpeed = 35;    //Speed of bar scrolling
     float timer = 0.f;  //Timer to increase speed
     int score = 0;  //Play score
 
-    boolean UpdateHighscore = true;
+    boolean UpdateHighscore = true; //Highscore update
 
-    AppPrefs appPrefs;
+    AppPrefs appPrefs;  //Shared prefs
+
     float DestinationPoint = 1600.0f; // For Adventure
 
-    private boolean GameActive = true;
-    private boolean GamePaused = false;
+    private boolean GameActive = true;  //Status of game
+    private boolean GamePaused = false; //Paused status of game
+
     private boolean Win = false;    //Will always lose if endless mode
 
     private int GameMode = 0;   // 0 for Endless, 1 For Adventure
@@ -126,11 +131,15 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         // Make the GamePanel focusable so it can handle events
         setFocusable(true);
 
+        //Creating obstacles
         for (int i = 0; i < obstacleList.length; ++i) {
             obstacleList[i] = new Obstacle();
         }
+
+        //Initializing nearest obstacle
         nearestObstacle = obstacleList[0];
 
+        //Shared prefs
         appPrefs = new AppPrefs(context);
     }
 
@@ -188,6 +197,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
             //Adventure mode
             if(GameMode == 1)
             {
+                //Adventure mode UI info
                 canvas.drawBitmap(Progress_line.getImage(), Progress_line.getPosX(), Progress_line.getPosY(), null);
                 canvas.drawBitmap(Progress_bar.getImage(), Progress_bar.getPosX(), Progress_bar.getPosY(), null);
             }
@@ -237,10 +247,12 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                 if (!GamePaused)
                 {
                     bgX -= ScrollSpeed * dt; //Speed of background scrolling
+                    //Reset once reaches 0
                     if (bgX < -ScreenWidth) {
                         bgX = 0;
                     }
 
+                    //Only when game is active we update the following
                     if (GameActive) {
                         SpawnTimer += dt;
                         timer += dt;
@@ -297,6 +309,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
                             UpdateHighscore = false;
                         }
 
+                        //Vibration feedback
                         vibrateTime += dt;
                         if (vibrateTime > MaxVibrateTime) {
                             stopVibrate();
@@ -371,9 +384,10 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    //Collision check AABB
     public boolean CheckCollision(int x1,int y1,int w1,int h1, int x2, int y2, int w2, int h2)
     {
-        if(x2>=x1 && x2<=x1 + w1){  //start detect collision of top left
+        if(x2>=x1 && x2<=x1 + w1){  //Top left
             if(y2>= y1 & y2<= y1 + h1){
                 return true;
             }
@@ -396,6 +410,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         return false;
     }
 
+    //Checking if touch location is within area
     public boolean CheckTouch(float touch_x,float touch_y, float min_x,float min_y, int max_x,int max_y)
     {
         if(touch_x >= min_x && touch_x <= max_x && touch_y >= min_y && touch_y <= max_y){
@@ -404,11 +419,14 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         return false;
     }
 
+    //Getting the next available obstacle in the list to reuse
     public void FetchObstacle()
     {
         for(int i = 0; i < obstacleList.length; ++i){
             if(obstacleList[i].isActive() == false){
                 int result = r.nextInt((100 - 0) + 1) + 0;
+
+                //Creating new obstacle based on randomized probabilty
                 if(result >= 80) {
                     obstacleList[i].SetAllData(ScreenWidth, 525, BitmapFactory.decodeResource(getResources(),
                             R.drawable.tap_obstacle2), Obstacle.TYPE.T_TAP, 10, true);
@@ -525,6 +543,7 @@ public class GamePanelSurfaceView extends SurfaceView implements SurfaceHolder.C
         }
     }
 
+    //Proccess user's input
     public int ProcessSwipe(Vector2 SwipeDirection) {
         float x = SwipeDirection.x;
         float y = SwipeDirection.y;
